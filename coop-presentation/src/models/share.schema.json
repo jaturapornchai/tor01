@@ -1,0 +1,654 @@
+{
+  "collections": {
+    "share_transactions": {
+      "description": "ธุรกรรมหุ้น - เก็บรายการซื้อ ถอน โอน และการเปลี่ยนแปลงหุ้นทุกรายการ",
+      "schema": {
+        "_id": {
+          "type": "ObjectId",
+          "description": "รหัสเอกสาร MongoDB"
+        },
+        "memberId": {
+          "type": "ObjectId",
+          "description": "รหัสสมาชิก (อ้างอิง members)"
+        },
+        "memberNo": {
+          "type": "string",
+          "description": "เลขทะเบียนสมาชิก เช่น M2567-00125"
+        },
+        "memberName": {
+          "type": "string",
+          "description": "ชื่อ-นามสกุลสมาชิก"
+        },
+        "transactionNo": {
+          "type": "string",
+          "description": "เลขที่รายการ เช่น SH2567-001234"
+        },
+        "transactionDate": {
+          "type": "Date",
+          "description": "วันที่ทำรายการ"
+        },
+        "effectiveDate": {
+          "type": "Date",
+          "description": "วันที่มีผลในระบบบัญชี"
+        },
+        "type": {
+          "type": "string",
+          "enum": ["initial", "monthly", "additional", "withdraw", "dividend", "refund", "transfer_in", "transfer_out", "adjustment"],
+          "description": "ประเภทธุรกรรมหุ้น"
+        },
+        "shares": {
+          "type": "number",
+          "description": "จำนวนหุ้น (บวก = เพิ่ม, ลบ = ลด)"
+        },
+        "pricePerShare": {
+          "type": "number",
+          "description": "ราคาต่อหุ้น (บาท)"
+        },
+        "amount": {
+          "type": "number",
+          "description": "จำนวนเงิน (บาท)"
+        },
+        "balanceBefore": {
+          "type": "number",
+          "description": "จำนวนหุ้นก่อนทำรายการ"
+        },
+        "balanceAfter": {
+          "type": "number",
+          "description": "จำนวนหุ้นหลังทำรายการ"
+        },
+        "valueBefore": {
+          "type": "number",
+          "description": "มูลค่าหุ้นก่อนทำรายการ (บาท)"
+        },
+        "valueAfter": {
+          "type": "number",
+          "description": "มูลค่าหุ้นหลังทำรายการ (บาท)"
+        },
+        "paymentMethod": {
+          "type": "string",
+          "enum": ["salary_deduction", "bank_transfer", "cash", "cheque", "auto_debit"],
+          "description": "วิธีการชำระเงิน/รับเงิน"
+        },
+        "paymentRef": {
+          "type": "string",
+          "description": "เลขอ้างอิงการชำระเงิน"
+        },
+        "bankAccount": {
+          "type": "object",
+          "description": "บัญชีธนาคารที่ใช้ทำรายการ",
+          "properties": {
+            "bankName": {
+              "type": "string",
+              "description": "ชื่อธนาคาร"
+            },
+            "accountNo": {
+              "type": "string",
+              "description": "เลขที่บัญชี"
+            }
+          }
+        },
+        "withdrawFee": {
+          "type": "number",
+          "description": "ค่าธรรมเนียมการถอน (บาท) - กรณีถอนหุ้น"
+        },
+        "netAmount": {
+          "type": "number",
+          "description": "จำนวนเงินสุทธิหลังหักค่าธรรมเนียม (บาท)"
+        },
+        "transferInfo": {
+          "type": "object",
+          "description": "ข้อมูลการโอนหุ้น (กรณีโอนหุ้น)",
+          "properties": {
+            "fromMemberId": {
+              "type": "ObjectId",
+              "description": "รหัสสมาชิกผู้โอน"
+            },
+            "fromMemberNo": {
+              "type": "string",
+              "description": "เลขทะเบียนผู้โอน"
+            },
+            "fromMemberName": {
+              "type": "string",
+              "description": "ชื่อผู้โอน"
+            },
+            "toMemberId": {
+              "type": "ObjectId",
+              "description": "รหัสสมาชิกผู้รับโอน"
+            },
+            "toMemberNo": {
+              "type": "string",
+              "description": "เลขทะเบียนผู้รับโอน"
+            },
+            "toMemberName": {
+              "type": "string",
+              "description": "ชื่อผู้รับโอน"
+            },
+            "relation": {
+              "type": "string",
+              "description": "ความสัมพันธ์ระหว่างผู้โอนและผู้รับโอน"
+            }
+          }
+        },
+        "dividendInfo": {
+          "type": "object",
+          "description": "ข้อมูลเงินปันผล (กรณีรับปันผล)",
+          "properties": {
+            "year": {
+              "type": "number",
+              "description": "ปีที่จ่ายปันผล (พ.ศ.)"
+            },
+            "dividendRate": {
+              "type": "number",
+              "description": "อัตราปันผล (%)"
+            },
+            "baseShares": {
+              "type": "number",
+              "description": "หุ้นที่ใช้คำนวณปันผล"
+            },
+            "dividendAmount": {
+              "type": "number",
+              "description": "จำนวนเงินปันผล (บาท)"
+            }
+          }
+        },
+        "refundInfo": {
+          "type": "object",
+          "description": "ข้อมูลการคืนหุ้น (กรณีลาออก)",
+          "properties": {
+            "resignDate": {
+              "type": "Date",
+              "description": "วันที่ลาออก"
+            },
+            "totalShares": {
+              "type": "number",
+              "description": "จำนวนหุ้นทั้งหมด"
+            },
+            "refundAmount": {
+              "type": "number",
+              "description": "จำนวนเงินที่คืน (บาท)"
+            },
+            "deductions": {
+              "type": "array",
+              "description": "รายการหักเงิน",
+              "items": {
+                "type": {
+                  "type": "string",
+                  "description": "ประเภทการหัก เช่น loan, fee"
+                },
+                "description": {
+                  "type": "string",
+                  "description": "รายละเอียด"
+                },
+                "amount": {
+                  "type": "number",
+                  "description": "จำนวนเงินที่หัก (บาท)"
+                }
+              }
+            },
+            "netRefund": {
+              "type": "number",
+              "description": "เงินคืนสุทธิ (บาท)"
+            }
+          }
+        },
+        "status": {
+          "type": "string",
+          "enum": ["pending", "approved", "rejected", "completed", "cancelled"],
+          "description": "สถานะรายการ"
+        },
+        "approval": {
+          "type": "object",
+          "description": "ข้อมูลการอนุมัติ",
+          "properties": {
+            "requestedAt": {
+              "type": "Date",
+              "description": "วันที่ขออนุมัติ"
+            },
+            "requestedBy": {
+              "type": "ObjectId",
+              "description": "รหัสผู้ขออนุมัติ (อ้างอิง users)"
+            },
+            "approvedAt": {
+              "type": "Date|null",
+              "description": "วันที่อนุมัติ"
+            },
+            "approvedBy": {
+              "type": "ObjectId|null",
+              "description": "รหัสผู้อนุมัติ (อ้างอิง users)"
+            },
+            "rejectedAt": {
+              "type": "Date|null",
+              "description": "วันที่ไม่อนุมัติ"
+            },
+            "rejectedBy": {
+              "type": "ObjectId|null",
+              "description": "รหัสผู้ไม่อนุมัติ (อ้างอิง users)"
+            },
+            "rejectionReason": {
+              "type": "string",
+              "description": "เหตุผลที่ไม่อนุมัติ"
+            }
+          }
+        },
+        "remarks": {
+          "type": "string",
+          "description": "หมายเหตุ/รายละเอียดเพิ่มเติม"
+        },
+        "createdAt": {
+          "type": "Date",
+          "description": "วันที่สร้างรายการ"
+        },
+        "createdBy": {
+          "type": "ObjectId",
+          "description": "รหัสผู้สร้างรายการ (อ้างอิง users)"
+        },
+        "updatedAt": {
+          "type": "Date",
+          "description": "วันที่แก้ไขล่าสุด"
+        },
+        "updatedBy": {
+          "type": "ObjectId",
+          "description": "รหัสผู้แก้ไขล่าสุด (อ้างอิง users)"
+        }
+      },
+      "indexes": [
+        { "key": { "transactionNo": 1 }, "unique": true, "description": "เลขที่รายการต้องไม่ซ้ำ" },
+        { "key": { "memberId": 1, "transactionDate": -1 }, "description": "ค้นหาตามสมาชิกและวันที่" },
+        { "key": { "type": 1, "status": 1 }, "description": "ค้นหาตามประเภทและสถานะ" },
+        { "key": { "transactionDate": -1 }, "description": "เรียงตามวันที่ทำรายการ" },
+        { "key": { "effectiveDate": -1 }, "description": "เรียงตามวันที่มีผล" },
+        { "key": { "status": 1, "createdAt": -1 }, "description": "ค้นหารายการรออนุมัติ" }
+      ]
+    },
+    "share_monthly_summary": {
+      "description": "สรุปหุ้นรายเดือน - เก็บข้อมูลสรุปหุ้นของสหกรณ์แยกตามเดือน",
+      "schema": {
+        "_id": {
+          "type": "ObjectId",
+          "description": "รหัสเอกสาร MongoDB"
+        },
+        "year": {
+          "type": "number",
+          "description": "ปี (พ.ศ.)"
+        },
+        "month": {
+          "type": "number",
+          "description": "เดือน (1-12)"
+        },
+        "periodName": {
+          "type": "string",
+          "description": "ชื่องวด เช่น มกราคม 2567"
+        },
+        "totalMembers": {
+          "type": "number",
+          "description": "จำนวนสมาชิกทั้งหมด ณ สิ้นเดือน"
+        },
+        "activeMembers": {
+          "type": "number",
+          "description": "จำนวนสมาชิกที่มีธุรกรรมในเดือนนี้"
+        },
+        "totalShares": {
+          "type": "number",
+          "description": "จำนวนหุ้นรวมทั้งหมด ณ สิ้นเดือน"
+        },
+        "totalAmount": {
+          "type": "number",
+          "description": "มูลค่าหุ้นรวม ณ สิ้นเดือน (บาท)"
+        },
+        "transactions": {
+          "type": "object",
+          "description": "สรุปธุรกรรมในเดือน",
+          "properties": {
+            "initialShares": {
+              "type": "number",
+              "description": "หุ้นแรกเข้า (หุ้น)"
+            },
+            "initialAmount": {
+              "type": "number",
+              "description": "เงินหุ้นแรกเข้า (บาท)"
+            },
+            "monthlyShares": {
+              "type": "number",
+              "description": "หุ้นรายเดือน (หุ้น)"
+            },
+            "monthlyAmount": {
+              "type": "number",
+              "description": "เงินหุ้นรายเดือน (บาท)"
+            },
+            "additionalShares": {
+              "type": "number",
+              "description": "หุ้นซื้อเพิ่ม (หุ้น)"
+            },
+            "additionalAmount": {
+              "type": "number",
+              "description": "เงินหุ้นซื้อเพิ่ม (บาท)"
+            },
+            "withdrawnShares": {
+              "type": "number",
+              "description": "หุ้นที่ถอน (หุ้น)"
+            },
+            "withdrawnAmount": {
+              "type": "number",
+              "description": "เงินหุ้นที่ถอน (บาท)"
+            },
+            "refundedShares": {
+              "type": "number",
+              "description": "หุ้นที่คืน (ลาออก) (หุ้น)"
+            },
+            "refundedAmount": {
+              "type": "number",
+              "description": "เงินหุ้นที่คืน (บาท)"
+            },
+            "totalNewShares": {
+              "type": "number",
+              "description": "หุ้นใหม่รวม (หุ้น)"
+            },
+            "totalReducedShares": {
+              "type": "number",
+              "description": "หุ้นลดรวม (หุ้น)"
+            },
+            "netShares": {
+              "type": "number",
+              "description": "หุ้นสุทธิ (บวก/ลบ)"
+            },
+            "netAmount": {
+              "type": "number",
+              "description": "เงินสุทธิ (บาท)"
+            }
+          }
+        },
+        "comparison": {
+          "type": "object",
+          "description": "เปรียบเทียบกับเดือนก่อน",
+          "properties": {
+            "shareChange": {
+              "type": "number",
+              "description": "หุ้นเปลี่ยนแปลง (หุ้น)"
+            },
+            "shareChangePercent": {
+              "type": "number",
+              "description": "หุ้นเปลี่ยนแปลง (%)"
+            },
+            "amountChange": {
+              "type": "number",
+              "description": "มูลค่าเปลี่ยนแปลง (บาท)"
+            },
+            "memberChange": {
+              "type": "number",
+              "description": "สมาชิกเปลี่ยนแปลง (คน)"
+            }
+          }
+        },
+        "status": {
+          "type": "string",
+          "enum": ["open", "closed", "locked"],
+          "description": "สถานะงวด"
+        },
+        "closedAt": {
+          "type": "Date|null",
+          "description": "วันที่ปิดงวด"
+        },
+        "closedBy": {
+          "type": "ObjectId|null",
+          "description": "รหัสผู้ปิดงวด (อ้างอิง users)"
+        },
+        "createdAt": {
+          "type": "Date",
+          "description": "วันที่สร้างข้อมูล"
+        },
+        "updatedAt": {
+          "type": "Date",
+          "description": "วันที่อัพเดทล่าสุด"
+        }
+      },
+      "indexes": [
+        { "key": { "year": 1, "month": 1 }, "unique": true, "description": "ปีและเดือนต้องไม่ซ้ำ" },
+        { "key": { "status": 1 }, "description": "ค้นหาตามสถานะ" }
+      ]
+    },
+    "share_member_balance": {
+      "description": "ยอดหุ้นสมาชิก - เก็บยอดหุ้นปัจจุบันของสมาชิกแต่ละคน",
+      "schema": {
+        "_id": {
+          "type": "ObjectId",
+          "description": "รหัสเอกสาร MongoDB"
+        },
+        "memberId": {
+          "type": "ObjectId",
+          "description": "รหัสสมาชิก (อ้างอิง members)"
+        },
+        "memberNo": {
+          "type": "string",
+          "description": "เลขทะเบียนสมาชิก"
+        },
+        "memberName": {
+          "type": "string",
+          "description": "ชื่อ-นามสกุลสมาชิก"
+        },
+        "totalShares": {
+          "type": "number",
+          "description": "จำนวนหุ้นรวม"
+        },
+        "totalValue": {
+          "type": "number",
+          "description": "มูลค่าหุ้นรวม (บาท)"
+        },
+        "initialShares": {
+          "type": "number",
+          "description": "หุ้นแรกเข้า"
+        },
+        "monthlyShares": {
+          "type": "number",
+          "description": "หุ้นรายเดือนที่ซื้อ"
+        },
+        "additionalShares": {
+          "type": "number",
+          "description": "หุ้นที่ซื้อเพิ่ม"
+        },
+        "withdrawnShares": {
+          "type": "number",
+          "description": "หุ้นที่ถอนไปแล้ว"
+        },
+        "currentMonthlyRate": {
+          "type": "number",
+          "description": "อัตราหุ้นรายเดือนปัจจุบัน (หุ้น/เดือน)"
+        },
+        "lastTransactionDate": {
+          "type": "Date",
+          "description": "วันที่ทำรายการล่าสุด"
+        },
+        "lastTransactionType": {
+          "type": "string",
+          "description": "ประเภทรายการล่าสุด"
+        },
+        "updatedAt": {
+          "type": "Date",
+          "description": "วันที่อัพเดทยอดล่าสุด"
+        }
+      },
+      "indexes": [
+        { "key": { "memberId": 1 }, "unique": true, "description": "หนึ่งสมาชิกมีหนึ่งยอด" },
+        { "key": { "memberNo": 1 }, "unique": true, "description": "ค้นหาตามเลขทะเบียน" },
+        { "key": { "totalShares": -1 }, "description": "เรียงตามหุ้น" },
+        { "key": { "totalValue": -1 }, "description": "เรียงตามมูลค่า" }
+      ]
+    },
+    "share_settings": {
+      "description": "การตั้งค่าหุ้น - เก็บกฎเกณฑ์และเงื่อนไขการซื้อขายหุ้น",
+      "schema": {
+        "_id": {
+          "type": "ObjectId",
+          "description": "รหัสเอกสาร MongoDB"
+        },
+        "parValue": {
+          "type": "number",
+          "description": "มูลค่าที่ตราไว้ต่อหุ้น (บาท)",
+          "default": 10
+        },
+        "minInitialShares": {
+          "type": "number",
+          "description": "หุ้นแรกเข้าขั้นต่ำ (หุ้น)"
+        },
+        "maxInitialShares": {
+          "type": "number",
+          "description": "หุ้นแรกเข้าสูงสุด (หุ้น)"
+        },
+        "minMonthlyShares": {
+          "type": "number",
+          "description": "หุ้นรายเดือนขั้นต่ำ (หุ้น)"
+        },
+        "maxMonthlyShares": {
+          "type": "number",
+          "description": "หุ้นรายเดือนสูงสุด (หุ้น)"
+        },
+        "minAdditionalShares": {
+          "type": "number",
+          "description": "ซื้อเพิ่มขั้นต่ำต่อครั้ง (หุ้น)"
+        },
+        "maxAdditionalShares": {
+          "type": "number",
+          "description": "ซื้อเพิ่มสูงสุดต่อครั้ง (หุ้น)"
+        },
+        "minWithdrawShares": {
+          "type": "number",
+          "description": "ถอนขั้นต่ำต่อครั้ง (หุ้น)"
+        },
+        "minRemainingShares": {
+          "type": "number",
+          "description": "หุ้นคงเหลือขั้นต่ำหลังถอน (หุ้น)"
+        },
+        "withdrawFeePercent": {
+          "type": "number",
+          "description": "ค่าธรรมเนียมการถอน (%)"
+        },
+        "canWithdrawAfterMonths": {
+          "type": "number",
+          "description": "ถอนได้หลังเป็นสมาชิกกี่เดือน"
+        },
+        "maxWithdrawPerYear": {
+          "type": "number",
+          "description": "ถอนได้สูงสุดกี่ครั้งต่อปี"
+        },
+        "guaranteeRatio": {
+          "type": "number",
+          "description": "อัตราส่วนหุ้นต่อการค้ำประกัน (เท่า) - เช่น 5 หมายถึงค้ำได้ 5 เท่าของหุ้น"
+        },
+        "effectiveDate": {
+          "type": "Date",
+          "description": "วันที่เริ่มมีผลบังคับใช้"
+        },
+        "isActive": {
+          "type": "boolean",
+          "description": "สถานะการใช้งาน"
+        },
+        "createdAt": {
+          "type": "Date",
+          "description": "วันที่สร้าง"
+        },
+        "createdBy": {
+          "type": "ObjectId",
+          "description": "รหัสผู้สร้าง (อ้างอิง users)"
+        },
+        "updatedAt": {
+          "type": "Date",
+          "description": "วันที่แก้ไขล่าสุด"
+        },
+        "updatedBy": {
+          "type": "ObjectId",
+          "description": "รหัสผู้แก้ไข (อ้างอิง users)"
+        }
+      },
+      "indexes": [
+        { "key": { "effectiveDate": -1 }, "description": "เรียงตามวันที่มีผล" },
+        { "key": { "isActive": 1 }, "description": "ค้นหาการตั้งค่าที่ใช้งาน" }
+      ]
+    }
+  },
+  "enums": {
+    "transactionTypes": {
+      "initial": "หุ้นแรกเข้า - หุ้นที่ซื้อตอนสมัครสมาชิก",
+      "monthly": "หุ้นรายเดือน - หุ้นที่หักเงินเดือนทุกเดือน",
+      "additional": "ซื้อหุ้นเพิ่ม - ซื้อหุ้นเพิ่มเติมนอกเหนือจากรายเดือน",
+      "withdraw": "ถอนหุ้น - ขอถอนหุ้นบางส่วน",
+      "dividend": "ปันผล - รับเงินปันผลประจำปี",
+      "refund": "คืนหุ้น (ลาออก) - คืนหุ้นเมื่อลาออก",
+      "transfer_in": "รับโอน - รับโอนหุ้นจากสมาชิกอื่น",
+      "transfer_out": "โอนออก - โอนหุ้นให้สมาชิกอื่น",
+      "adjustment": "ปรับปรุง - ปรับปรุงยอดหุ้น (กรณีพิเศษ)"
+    },
+    "transactionStatus": {
+      "pending": "รอดำเนินการ - รอการอนุมัติ",
+      "approved": "อนุมัติ - ได้รับการอนุมัติแล้ว",
+      "rejected": "ไม่อนุมัติ - ถูกปฏิเสธ",
+      "completed": "เสร็จสิ้น - ดำเนินการเรียบร้อย",
+      "cancelled": "ยกเลิก - ถูกยกเลิก"
+    },
+    "periodStatus": {
+      "open": "เปิด - รับรายการได้",
+      "closed": "ปิด - ปิดรับรายการแล้ว",
+      "locked": "ล็อค - ล็อคแก้ไขไม่ได้"
+    },
+    "paymentMethods": {
+      "salary_deduction": "หักเงินเดือน",
+      "bank_transfer": "โอนผ่านธนาคาร",
+      "cash": "เงินสด",
+      "cheque": "เช็ค",
+      "auto_debit": "หักบัญชีอัตโนมัติ"
+    }
+  },
+  "examples": {
+    "initial_share": {
+      "_id": "ObjectId('...')",
+      "memberNo": "M2567-00125",
+      "memberName": "นายสมชาย ใจดี",
+      "transactionNo": "SH2567-001234",
+      "transactionDate": "2024-01-15T00:00:00.000Z",
+      "effectiveDate": "2024-01-15T00:00:00.000Z",
+      "type": "initial",
+      "shares": 100,
+      "pricePerShare": 10,
+      "amount": 1000,
+      "balanceBefore": 0,
+      "balanceAfter": 100,
+      "paymentMethod": "bank_transfer",
+      "status": "completed",
+      "remarks": "หุ้นแรกเข้า"
+    },
+    "monthly_share": {
+      "_id": "ObjectId('...')",
+      "memberNo": "M2567-00125",
+      "memberName": "นายสมชาย ใจดี",
+      "transactionNo": "SH2567-002345",
+      "transactionDate": "2024-02-01T00:00:00.000Z",
+      "effectiveDate": "2024-02-01T00:00:00.000Z",
+      "type": "monthly",
+      "shares": 10,
+      "pricePerShare": 10,
+      "amount": 100,
+      "balanceBefore": 100,
+      "balanceAfter": 110,
+      "paymentMethod": "salary_deduction",
+      "status": "completed",
+      "remarks": "หุ้นรายเดือน ก.พ. 2567"
+    },
+    "withdraw_share": {
+      "_id": "ObjectId('...')",
+      "memberNo": "M2565-00050",
+      "memberName": "นายสมศักดิ์ รักดี",
+      "transactionNo": "SH2567-003456",
+      "transactionDate": "2024-03-15T00:00:00.000Z",
+      "effectiveDate": "2024-03-20T00:00:00.000Z",
+      "type": "withdraw",
+      "shares": -50,
+      "pricePerShare": 10,
+      "amount": 500,
+      "balanceBefore": 500,
+      "balanceAfter": 450,
+      "withdrawFee": 25,
+      "netAmount": 475,
+      "paymentMethod": "bank_transfer",
+      "status": "approved",
+      "remarks": "ถอนหุ้นบางส่วน"
+    }
+  }
+}

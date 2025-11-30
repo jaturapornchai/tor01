@@ -1,0 +1,804 @@
+{
+  "collection": "members",
+  "description": "ข้อมูลสมาชิกสหกรณ์ - เก็บข้อมูลส่วนบุคคล ที่อยู่ การติดต่อ การทำงาน และข้อมูลการเป็นสมาชิก",
+  "schema": {
+    "_id": {
+      "type": "ObjectId",
+      "description": "รหัสเอกสาร MongoDB"
+    },
+    "personalInfo": {
+      "type": "object",
+      "description": "ข้อมูลส่วนบุคคล",
+      "properties": {
+        "idCard": {
+          "type": "string",
+          "description": "เลขบัตรประชาชน 13 หลัก"
+        },
+        "title": {
+          "type": "string",
+          "enum": ["นาย", "นาง", "นางสาว", "ด.ช.", "ด.ญ.", "Mr.", "Mrs.", "Miss"],
+          "description": "คำนำหน้าชื่อ"
+        },
+        "firstName": {
+          "type": "string",
+          "description": "ชื่อ (ภาษาไทย)"
+        },
+        "lastName": {
+          "type": "string",
+          "description": "นามสกุล (ภาษาไทย)"
+        },
+        "firstNameEn": {
+          "type": "string",
+          "description": "ชื่อ (ภาษาอังกฤษ)"
+        },
+        "lastNameEn": {
+          "type": "string",
+          "description": "นามสกุล (ภาษาอังกฤษ)"
+        },
+        "nickname": {
+          "type": "string",
+          "description": "ชื่อเล่น"
+        },
+        "birthDate": {
+          "type": "Date",
+          "description": "วันเดือนปีเกิด"
+        },
+        "age": {
+          "type": "number",
+          "description": "อายุ (ปี) - คำนวณจากวันเกิด"
+        },
+        "gender": {
+          "type": "string",
+          "enum": ["male", "female", "other"],
+          "description": "เพศ"
+        },
+        "bloodType": {
+          "type": "string",
+          "enum": ["A", "B", "AB", "O", "A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"],
+          "description": "กรุ๊ปเลือด"
+        },
+        "maritalStatus": {
+          "type": "string",
+          "enum": ["single", "married", "divorced", "widowed", "separated"],
+          "description": "สถานภาพสมรส"
+        },
+        "nationality": {
+          "type": "string",
+          "description": "สัญชาติ"
+        },
+        "ethnicity": {
+          "type": "string",
+          "description": "เชื้อชาติ"
+        },
+        "religion": {
+          "type": "string",
+          "description": "ศาสนา"
+        },
+        "photo": {
+          "type": "string",
+          "description": "URL รูปถ่ายสมาชิก"
+        },
+        "idCardPhoto": {
+          "type": "string",
+          "description": "URL รูปถ่ายบัตรประชาชน"
+        }
+      }
+    },
+    "registeredAddress": {
+      "type": "object",
+      "description": "ที่อยู่ตามทะเบียนบ้าน",
+      "properties": {
+        "houseNo": {
+          "type": "string",
+          "description": "บ้านเลขที่"
+        },
+        "moo": {
+          "type": "string",
+          "description": "หมู่ที่"
+        },
+        "building": {
+          "type": "string",
+          "description": "ชื่ออาคาร/หมู่บ้าน/คอนโด"
+        },
+        "floor": {
+          "type": "string",
+          "description": "ชั้น"
+        },
+        "room": {
+          "type": "string",
+          "description": "ห้อง/ยูนิต"
+        },
+        "soi": {
+          "type": "string",
+          "description": "ซอย/ตรอก"
+        },
+        "road": {
+          "type": "string",
+          "description": "ถนน"
+        },
+        "subDistrict": {
+          "type": "string",
+          "description": "ตำบล/แขวง"
+        },
+        "district": {
+          "type": "string",
+          "description": "อำเภอ/เขต"
+        },
+        "province": {
+          "type": "string",
+          "description": "จังหวัด"
+        },
+        "postalCode": {
+          "type": "string",
+          "description": "รหัสไปรษณีย์"
+        },
+        "country": {
+          "type": "string",
+          "description": "ประเทศ",
+          "default": "ประเทศไทย"
+        },
+        "lat": {
+          "type": "number",
+          "description": "พิกัดละติจูด (GPS)"
+        },
+        "lng": {
+          "type": "number",
+          "description": "พิกัดลองจิจูด (GPS)"
+        },
+        "fullAddress": {
+          "type": "string",
+          "description": "ที่อยู่แบบเต็ม (รวมทุกส่วน)"
+        }
+      }
+    },
+    "currentAddress": {
+      "type": "object",
+      "description": "ที่อยู่ปัจจุบัน (ที่พักอาศัย)",
+      "properties": {
+        "houseNo": {
+          "type": "string",
+          "description": "บ้านเลขที่"
+        },
+        "moo": {
+          "type": "string",
+          "description": "หมู่ที่"
+        },
+        "building": {
+          "type": "string",
+          "description": "ชื่ออาคาร/หมู่บ้าน/คอนโด"
+        },
+        "floor": {
+          "type": "string",
+          "description": "ชั้น"
+        },
+        "room": {
+          "type": "string",
+          "description": "ห้อง/ยูนิต"
+        },
+        "soi": {
+          "type": "string",
+          "description": "ซอย/ตรอก"
+        },
+        "road": {
+          "type": "string",
+          "description": "ถนน"
+        },
+        "subDistrict": {
+          "type": "string",
+          "description": "ตำบล/แขวง"
+        },
+        "district": {
+          "type": "string",
+          "description": "อำเภอ/เขต"
+        },
+        "province": {
+          "type": "string",
+          "description": "จังหวัด"
+        },
+        "postalCode": {
+          "type": "string",
+          "description": "รหัสไปรษณีย์"
+        },
+        "country": {
+          "type": "string",
+          "description": "ประเทศ"
+        },
+        "lat": {
+          "type": "number",
+          "description": "พิกัดละติจูด (GPS)"
+        },
+        "lng": {
+          "type": "number",
+          "description": "พิกัดลองจิจูด (GPS)"
+        },
+        "fullAddress": {
+          "type": "string",
+          "description": "ที่อยู่แบบเต็ม (รวมทุกส่วน)"
+        }
+      }
+    },
+    "sameAsRegistered": {
+      "type": "boolean",
+      "description": "ที่อยู่ปัจจุบันเหมือนทะเบียนบ้านหรือไม่"
+    },
+    "contact": {
+      "type": "object",
+      "description": "ข้อมูลการติดต่อ",
+      "properties": {
+        "phone": {
+          "type": "string",
+          "description": "หมายเลขโทรศัพท์บ้าน"
+        },
+        "mobile": {
+          "type": "string",
+          "description": "หมายเลขโทรศัพท์มือถือ"
+        },
+        "email": {
+          "type": "string",
+          "description": "อีเมล"
+        },
+        "lineId": {
+          "type": "string",
+          "description": "ไลน์ไอดี (Line ID)"
+        },
+        "facebook": {
+          "type": "string",
+          "description": "เฟซบุ๊ก (Facebook URL หรือชื่อ)"
+        },
+        "emergencyContact": {
+          "type": "object",
+          "description": "ผู้ติดต่อกรณีฉุกเฉิน",
+          "properties": {
+            "name": {
+              "type": "string",
+              "description": "ชื่อ-นามสกุลผู้ติดต่อฉุกเฉิน"
+            },
+            "relation": {
+              "type": "string",
+              "description": "ความสัมพันธ์กับสมาชิก เช่น บิดา, มารดา, คู่สมรส"
+            },
+            "phone": {
+              "type": "string",
+              "description": "หมายเลขโทรศัพท์ผู้ติดต่อฉุกเฉิน"
+            }
+          }
+        }
+      }
+    },
+    "employment": {
+      "type": "object",
+      "description": "ข้อมูลการทำงาน/การจ้างงาน",
+      "properties": {
+        "employeeId": {
+          "type": "string",
+          "description": "รหัสพนักงาน/เลขที่ตำแหน่ง"
+        },
+        "department": {
+          "type": "string",
+          "description": "หน่วยงาน/แผนก/สังกัด"
+        },
+        "position": {
+          "type": "string",
+          "description": "ตำแหน่งงาน"
+        },
+        "jobLevel": {
+          "type": "string",
+          "description": "ระดับ/ซี (เช่น C5, C6)"
+        },
+        "startDate": {
+          "type": "Date",
+          "description": "วันที่เริ่มงาน/วันบรรจุ"
+        },
+        "salary": {
+          "type": "number",
+          "description": "เงินเดือน (บาท)"
+        },
+        "workStatus": {
+          "type": "string",
+          "enum": ["active", "retired", "resigned", "suspended", "leave"],
+          "description": "สถานะการทำงาน"
+        },
+        "retiredDate": {
+          "type": "Date|null",
+          "description": "วันที่เกษียณอายุ"
+        }
+      }
+    },
+    "bankAccount": {
+      "type": "object",
+      "description": "บัญชีธนาคารสำหรับรับเงิน",
+      "properties": {
+        "bankCode": {
+          "type": "string",
+          "description": "รหัสธนาคาร (เช่น 006 = กรุงไทย)"
+        },
+        "bankName": {
+          "type": "string",
+          "description": "ชื่อธนาคาร"
+        },
+        "branchName": {
+          "type": "string",
+          "description": "ชื่อสาขา"
+        },
+        "accountNo": {
+          "type": "string",
+          "description": "เลขที่บัญชี"
+        },
+        "accountName": {
+          "type": "string",
+          "description": "ชื่อบัญชี"
+        },
+        "accountType": {
+          "type": "string",
+          "enum": ["savings", "current", "fixed"],
+          "description": "ประเภทบัญชี"
+        }
+      }
+    },
+    "membership": {
+      "type": "object",
+      "description": "ข้อมูลการเป็นสมาชิกสหกรณ์",
+      "properties": {
+        "memberNo": {
+          "type": "string",
+          "description": "เลขทะเบียนสมาชิก เช่น M2567-00125"
+        },
+        "memberType": {
+          "type": "string",
+          "enum": ["ordinary", "associate", "special", "honorary"],
+          "description": "ประเภทสมาชิก"
+        },
+        "joinDate": {
+          "type": "Date",
+          "description": "วันที่สมัครเป็นสมาชิก"
+        },
+        "approvedDate": {
+          "type": "Date|null",
+          "description": "วันที่ได้รับอนุมัติ"
+        },
+        "approvedBy": {
+          "type": "ObjectId|null",
+          "description": "รหัสผู้อนุมัติ (อ้างอิง users)"
+        },
+        "resignDate": {
+          "type": "Date|null",
+          "description": "วันที่ลาออก/พ้นสมาชิกภาพ"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["pending", "active", "resigned", "suspended", "deceased", "terminated"],
+          "description": "สถานะสมาชิก"
+        },
+        "resignReason": {
+          "type": "string",
+          "description": "เหตุผลในการลาออก/พ้นสมาชิกภาพ"
+        },
+        "yearsOfMembership": {
+          "type": "number",
+          "description": "อายุสมาชิก (ปี) - คำนวณจากวันสมัคร"
+        }
+      }
+    },
+    "shares": {
+      "type": "object",
+      "description": "ข้อมูลหุ้นสมาชิก",
+      "properties": {
+        "initialShares": {
+          "type": "number",
+          "description": "จำนวนหุ้นแรกเข้า"
+        },
+        "monthlyShares": {
+          "type": "number",
+          "description": "จำนวนหุ้นสะสมรายเดือน"
+        },
+        "totalShares": {
+          "type": "number",
+          "description": "จำนวนหุ้นสะสมทั้งหมด"
+        },
+        "shareValue": {
+          "type": "number",
+          "description": "มูลค่าหุ้นรวม (บาท)"
+        },
+        "sharePrice": {
+          "type": "number",
+          "description": "ราคาต่อหุ้น (บาท)",
+          "default": 10
+        },
+        "lastUpdated": {
+          "type": "Date",
+          "description": "วันที่อัพเดทข้อมูลหุ้นล่าสุด"
+        }
+      }
+    },
+    "paymentMethod": {
+      "type": "object",
+      "description": "วิธีการชำระเงิน (ค่าหุ้น/ค่างวด)",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["salary_deduction", "bank_transfer", "cash", "cheque", "auto_debit"],
+          "description": "ประเภทการชำระเงิน"
+        },
+        "bankAccount": {
+          "type": "object",
+          "description": "บัญชีสำหรับหักเงินอัตโนมัติ",
+          "properties": {
+            "bankName": {
+              "type": "string",
+              "description": "ชื่อธนาคาร"
+            },
+            "accountNo": {
+              "type": "string",
+              "description": "เลขที่บัญชี"
+            }
+          }
+        }
+      }
+    },
+    "beneficiaries": {
+      "type": "array",
+      "description": "ผู้รับผลประโยชน์ (กรณีสมาชิกเสียชีวิต)",
+      "items": {
+        "_id": {
+          "type": "ObjectId",
+          "description": "รหัสผู้รับผลประโยชน์"
+        },
+        "name": {
+          "type": "string",
+          "description": "ชื่อ-นามสกุลผู้รับผลประโยชน์"
+        },
+        "relation": {
+          "type": "string",
+          "description": "ความสัมพันธ์กับสมาชิก เช่น คู่สมรส, บุตร, บิดา, มารดา"
+        },
+        "percentage": {
+          "type": "number",
+          "description": "สัดส่วนการรับผลประโยชน์ (%) รวมทุกคนต้องเท่ากับ 100%"
+        },
+        "idCard": {
+          "type": "string",
+          "description": "เลขบัตรประชาชนผู้รับผลประโยชน์"
+        },
+        "phone": {
+          "type": "string",
+          "description": "หมายเลขโทรศัพท์ผู้รับผลประโยชน์"
+        },
+        "address": {
+          "type": "object",
+          "description": "ที่อยู่ผู้รับผลประโยชน์",
+          "properties": {
+            "houseNo": {
+              "type": "string",
+              "description": "บ้านเลขที่"
+            },
+            "moo": {
+              "type": "string",
+              "description": "หมู่ที่"
+            },
+            "soi": {
+              "type": "string",
+              "description": "ซอย"
+            },
+            "road": {
+              "type": "string",
+              "description": "ถนน"
+            },
+            "subDistrict": {
+              "type": "string",
+              "description": "ตำบล/แขวง"
+            },
+            "district": {
+              "type": "string",
+              "description": "อำเภอ/เขต"
+            },
+            "province": {
+              "type": "string",
+              "description": "จังหวัด"
+            },
+            "postalCode": {
+              "type": "string",
+              "description": "รหัสไปรษณีย์"
+            }
+          }
+        }
+      }
+    },
+    "documents": {
+      "type": "array",
+      "description": "เอกสารประกอบการสมัคร",
+      "items": {
+        "_id": {
+          "type": "ObjectId",
+          "description": "รหัสเอกสาร"
+        },
+        "type": {
+          "type": "string",
+          "enum": ["id_card", "house_registration", "photo", "salary_slip", "application_form", "other"],
+          "description": "ประเภทเอกสาร"
+        },
+        "fileName": {
+          "type": "string",
+          "description": "ชื่อไฟล์"
+        },
+        "fileUrl": {
+          "type": "string",
+          "description": "URL ไฟล์เอกสาร"
+        },
+        "fileSize": {
+          "type": "number",
+          "description": "ขนาดไฟล์ (bytes)"
+        },
+        "mimeType": {
+          "type": "string",
+          "description": "ประเภทไฟล์ (MIME type) เช่น image/jpeg, application/pdf"
+        },
+        "uploadedAt": {
+          "type": "Date",
+          "description": "วันที่อัพโหลดเอกสาร"
+        },
+        "uploadedBy": {
+          "type": "ObjectId",
+          "description": "รหัสผู้อัพโหลด (อ้างอิง users)"
+        }
+      }
+    },
+    "guarantor": {
+      "type": "object",
+      "description": "ข้อมูลการค้ำประกัน (เป็นผู้ค้ำให้คนอื่น)",
+      "properties": {
+        "maxGuaranteeAmount": {
+          "type": "number",
+          "description": "วงเงินค้ำประกันสูงสุดที่สามารถค้ำได้ (บาท)"
+        },
+        "currentGuaranteeAmount": {
+          "type": "number",
+          "description": "วงเงินที่กำลังค้ำอยู่ปัจจุบัน (บาท)"
+        },
+        "availableGuaranteeAmount": {
+          "type": "number",
+          "description": "วงเงินค้ำประกันที่เหลือ (บาท)"
+        },
+        "guaranteeCount": {
+          "type": "number",
+          "description": "จำนวนสัญญาที่กำลังค้ำอยู่"
+        },
+        "maxGuaranteeCount": {
+          "type": "number",
+          "description": "จำนวนสัญญาสูงสุดที่ค้ำได้"
+        }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "description": "สรุปข้อมูลการเงินของสมาชิก",
+      "properties": {
+        "totalShares": {
+          "type": "number",
+          "description": "มูลค่าหุ้นรวม (บาท)"
+        },
+        "totalDeposits": {
+          "type": "number",
+          "description": "ยอดเงินฝากรวม (บาท)"
+        },
+        "totalLoans": {
+          "type": "number",
+          "description": "ยอดเงินกู้คงเหลือ (บาท)"
+        },
+        "totalGuarantee": {
+          "type": "number",
+          "description": "ยอดค้ำประกันรวม (บาท)"
+        },
+        "netWorth": {
+          "type": "number",
+          "description": "ทุนเรือนหุ้นสุทธิ (หุ้น + เงินฝาก - เงินกู้)"
+        },
+        "lastCalculated": {
+          "type": "Date",
+          "description": "วันที่คำนวณล่าสุด"
+        }
+      }
+    },
+    "createdAt": {
+      "type": "Date",
+      "description": "วันที่สร้างข้อมูล"
+    },
+    "createdBy": {
+      "type": "ObjectId",
+      "description": "รหัสผู้สร้างข้อมูล (อ้างอิง users)"
+    },
+    "updatedAt": {
+      "type": "Date",
+      "description": "วันที่แก้ไขล่าสุด"
+    },
+    "updatedBy": {
+      "type": "ObjectId",
+      "description": "รหัสผู้แก้ไขล่าสุด (อ้างอิง users)"
+    },
+    "deletedAt": {
+      "type": "Date|null",
+      "description": "วันที่ลบข้อมูล (Soft Delete)"
+    },
+    "deletedBy": {
+      "type": "ObjectId|null",
+      "description": "รหัสผู้ลบข้อมูล (อ้างอิง users)"
+    },
+    "isDeleted": {
+      "type": "boolean",
+      "description": "สถานะการลบ (true = ถูกลบแล้ว)"
+    }
+  },
+  "indexes": [
+    { "key": { "personalInfo.idCard": 1 }, "unique": true, "description": "เลขบัตรประชาชนต้องไม่ซ้ำ" },
+    { "key": { "membership.memberNo": 1 }, "unique": true, "description": "เลขทะเบียนสมาชิกต้องไม่ซ้ำ" },
+    { "key": { "personalInfo.firstName": 1, "personalInfo.lastName": 1 }, "description": "ค้นหาตามชื่อ-นามสกุล" },
+    { "key": { "membership.status": 1 }, "description": "ค้นหาตามสถานะสมาชิก" },
+    { "key": { "employment.department": 1 }, "description": "ค้นหาตามหน่วยงาน" },
+    { "key": { "membership.joinDate": -1 }, "description": "เรียงตามวันที่สมัคร" },
+    { "key": { "createdAt": -1 }, "description": "เรียงตามวันที่สร้าง" },
+    { "key": { "contact.mobile": 1 }, "description": "ค้นหาตามเบอร์โทรศัพท์" }
+  ],
+  "enums": {
+    "gender": {
+      "male": "ชาย",
+      "female": "หญิง",
+      "other": "อื่นๆ"
+    },
+    "maritalStatus": {
+      "single": "โสด",
+      "married": "สมรส",
+      "divorced": "หย่าร้าง",
+      "widowed": "หม้าย",
+      "separated": "แยกกันอยู่"
+    },
+    "memberType": {
+      "ordinary": "สมาชิกสามัญ - พนักงานประจำที่มีสิทธิ์เต็ม",
+      "associate": "สมาชิกสมทบ - ผู้ที่ไม่ใช่พนักงานประจำ",
+      "special": "สมาชิกพิเศษ - สมาชิกกิตติมศักดิ์",
+      "honorary": "สมาชิกกิตติมศักดิ์"
+    },
+    "memberStatus": {
+      "pending": "รอการอนุมัติ - สมัครแล้วรอพิจารณา",
+      "active": "สมาชิกปกติ - เป็นสมาชิกอยู่",
+      "resigned": "ลาออก - ลาออกจากสหกรณ์",
+      "suspended": "ระงับสิทธิ์ - ถูกระงับสิทธิ์ชั่วคราว",
+      "deceased": "เสียชีวิต",
+      "terminated": "พ้นสมาชิกภาพ - ถูกให้ออกจากสหกรณ์"
+    },
+    "workStatus": {
+      "active": "ปฏิบัติงาน - ทำงานอยู่",
+      "retired": "เกษียณอายุ",
+      "resigned": "ลาออก",
+      "suspended": "พักงาน",
+      "leave": "ลาพักร้อน/ลาป่วย"
+    },
+    "paymentType": {
+      "salary_deduction": "หักเงินเดือน",
+      "bank_transfer": "โอนผ่านธนาคาร",
+      "cash": "เงินสด",
+      "cheque": "เช็ค",
+      "auto_debit": "หักบัญชีอัตโนมัติ"
+    },
+    "documentType": {
+      "id_card": "สำเนาบัตรประชาชน",
+      "house_registration": "สำเนาทะเบียนบ้าน",
+      "photo": "รูปถ่าย",
+      "salary_slip": "สลิปเงินเดือน",
+      "application_form": "ใบสมัครสมาชิก",
+      "other": "เอกสารอื่นๆ"
+    },
+    "accountType": {
+      "savings": "บัญชีออมทรัพย์",
+      "current": "บัญชีกระแสรายวัน",
+      "fixed": "บัญชีเงินฝากประจำ"
+    }
+  },
+  "example": {
+    "_id": "ObjectId('...')",
+    "personalInfo": {
+      "idCard": "1234567890123",
+      "title": "นาย",
+      "firstName": "สมชาย",
+      "lastName": "ใจดี",
+      "firstNameEn": "Somchai",
+      "lastNameEn": "Jaidee",
+      "nickname": "ชาย",
+      "birthDate": "1985-05-15T00:00:00.000Z",
+      "age": 39,
+      "gender": "male",
+      "bloodType": "O",
+      "maritalStatus": "married",
+      "nationality": "ไทย",
+      "ethnicity": "ไทย",
+      "religion": "พุทธ",
+      "photo": "/uploads/members/photo_123.jpg",
+      "idCardPhoto": "/uploads/members/idcard_123.jpg"
+    },
+    "registeredAddress": {
+      "houseNo": "123/45",
+      "moo": "5",
+      "building": "",
+      "floor": "",
+      "room": "",
+      "soi": "สุขใจ 5",
+      "road": "พหลโยธิน",
+      "subDistrict": "จตุจักร",
+      "district": "จตุจักร",
+      "province": "กรุงเทพมหานคร",
+      "postalCode": "10900",
+      "country": "ประเทศไทย",
+      "lat": 13.8199,
+      "lng": 100.5611,
+      "fullAddress": "123/45 หมู่ 5 ซอยสุขใจ 5 ถนนพหลโยธิน แขวงจตุจักร เขตจตุจักร กรุงเทพมหานคร 10900"
+    },
+    "contact": {
+      "phone": "02-123-4567",
+      "mobile": "081-234-5678",
+      "email": "somchai.j@example.com",
+      "lineId": "somchai_j",
+      "emergencyContact": {
+        "name": "นางสมใจ ใจดี",
+        "relation": "คู่สมรส",
+        "phone": "081-234-5679"
+      }
+    },
+    "employment": {
+      "employeeId": "EMP-001234",
+      "department": "ฝ่ายบัญชี",
+      "position": "นักบัญชีอาวุโส",
+      "jobLevel": "C6",
+      "startDate": "2010-01-01T00:00:00.000Z",
+      "salary": 45000,
+      "workStatus": "active"
+    },
+    "bankAccount": {
+      "bankCode": "006",
+      "bankName": "ธนาคารกรุงไทย",
+      "branchName": "สาขาจตุจักร",
+      "accountNo": "123-4-56789-0",
+      "accountName": "นายสมชาย ใจดี",
+      "accountType": "savings"
+    },
+    "membership": {
+      "memberNo": "M2567-00125",
+      "memberType": "ordinary",
+      "joinDate": "2024-01-15T00:00:00.000Z",
+      "approvedDate": "2024-01-20T00:00:00.000Z",
+      "resignDate": null,
+      "status": "active",
+      "resignReason": "",
+      "yearsOfMembership": 1
+    },
+    "shares": {
+      "initialShares": 100,
+      "monthlyShares": 10,
+      "totalShares": 220,
+      "shareValue": 2200,
+      "sharePrice": 10,
+      "lastUpdated": "2024-12-01T00:00:00.000Z"
+    },
+    "beneficiaries": [
+      {
+        "name": "นางสมใจ ใจดี",
+        "relation": "คู่สมรส",
+        "percentage": 50,
+        "idCard": "1234567890124",
+        "phone": "081-234-5679"
+      },
+      {
+        "name": "ด.ช.สมหมาย ใจดี",
+        "relation": "บุตร",
+        "percentage": 50,
+        "idCard": "1234567890125",
+        "phone": ""
+      }
+    ],
+    "summary": {
+      "totalShares": 2200,
+      "totalDeposits": 50000,
+      "totalLoans": 100000,
+      "totalGuarantee": 50000,
+      "netWorth": -47800,
+      "lastCalculated": "2024-12-01T00:00:00.000Z"
+    }
+  }
+}

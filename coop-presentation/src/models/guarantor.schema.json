@@ -1,0 +1,586 @@
+{
+  "collections": {
+    "guarantor_registry": {
+      "description": "ทะเบียนการค้ำประกัน - บันทึกข้อมูลการค้ำประกันเงินกู้ทุกสัญญา",
+      "schema": {
+        "_id": {
+          "type": "ObjectId",
+          "description": "รหัสเอกสารค้ำประกัน (สร้างอัตโนมัติ)"
+        },
+        "guarantorId": {
+          "type": "ObjectId",
+          "description": "รหัสสมาชิกผู้ค้ำประกัน (อ้างอิงจาก members)"
+        },
+        "guarantorNo": {
+          "type": "string",
+          "description": "เลขทะเบียนสมาชิกผู้ค้ำประกัน เช่น M2567-00050"
+        },
+        "guarantorName": {
+          "type": "string",
+          "description": "ชื่อ-นามสกุล ผู้ค้ำประกัน"
+        },
+        "guarantorIdCard": {
+          "type": "string",
+          "description": "เลขบัตรประชาชนผู้ค้ำประกัน 13 หลัก"
+        },
+        "guarantorDepartment": {
+          "type": "string",
+          "description": "หน่วยงาน/แผนกของผู้ค้ำประกัน"
+        },
+        "borrowerId": {
+          "type": "ObjectId",
+          "description": "รหัสสมาชิกผู้กู้ (อ้างอิงจาก members)"
+        },
+        "borrowerNo": {
+          "type": "string",
+          "description": "เลขทะเบียนสมาชิกผู้กู้ เช่น M2567-00125"
+        },
+        "borrowerName": {
+          "type": "string",
+          "description": "ชื่อ-นามสกุล ผู้กู้"
+        },
+        "borrowerIdCard": {
+          "type": "string",
+          "description": "เลขบัตรประชาชนผู้กู้ 13 หลัก"
+        },
+        "loanId": {
+          "type": "ObjectId",
+          "description": "รหัสสัญญาเงินกู้ (อ้างอิงจาก loans)"
+        },
+        "loanNo": {
+          "type": "string",
+          "description": "เลขที่สัญญาเงินกู้ เช่น LN2567-00125"
+        },
+        "loanType": {
+          "type": "string",
+          "description": "ประเภทเงินกู้ที่ค้ำประกัน",
+          "enum": ["emergency", "ordinary", "special", "refinance"]
+        },
+        "loanAmount": {
+          "type": "number",
+          "description": "วงเงินกู้ทั้งหมดของสัญญา (บาท)"
+        },
+        "guaranteeAmount": {
+          "type": "number",
+          "description": "วงเงินที่ค้ำประกัน (บาท) - อาจค้ำบางส่วนหรือทั้งหมด"
+        },
+        "guaranteePercent": {
+          "type": "number",
+          "description": "สัดส่วนที่ค้ำประกัน (%) เช่น 50 หมายถึงค้ำ 50% ของวงเงินกู้"
+        },
+        "signedDate": {
+          "type": "Date",
+          "description": "วันที่ลงนามในหนังสือค้ำประกัน (ISO format)"
+        },
+        "effectiveDate": {
+          "type": "Date",
+          "description": "วันที่การค้ำประกันมีผลบังคับ (วันที่อนุมัติเงินกู้)"
+        },
+        "releaseDate": {
+          "type": "Date|null",
+          "description": "วันที่พ้นภาระค้ำประกัน (null ถ้ายังค้ำอยู่)"
+        },
+        "status": {
+          "type": "string",
+          "description": "สถานะการค้ำประกัน",
+          "enum": ["active", "released", "defaulted", "paid", "written_off"]
+        },
+        "loanBalance": {
+          "type": "number",
+          "description": "ยอดหนี้คงเหลือปัจจุบันของสัญญา (บาท)"
+        },
+        "guaranteeBalance": {
+          "type": "number",
+          "description": "ภาระค้ำประกันคงเหลือ (บาท) = loanBalance × guaranteePercent/100"
+        },
+        "defaultInfo": {
+          "type": "object",
+          "description": "ข้อมูลกรณีต้องรับผิดชอบแทนผู้กู้ (เมื่อผู้กู้ผิดนัดชำระ)",
+          "properties": {
+            "defaultDate": {
+              "type": "Date",
+              "description": "วันที่ผู้ค้ำต้องรับผิดชอบ (วันที่สหกรณ์เรียกให้ชำระแทน)"
+            },
+            "defaultAmount": {
+              "type": "number",
+              "description": "จำนวนเงินที่ต้องรับผิดชอบทั้งหมด (บาท)"
+            },
+            "paidAmount": {
+              "type": "number",
+              "description": "จำนวนเงินที่ผู้ค้ำชำระไปแล้ว (บาท)"
+            },
+            "remainingAmount": {
+              "type": "number",
+              "description": "จำนวนเงินคงเหลือที่ต้องชำระ (บาท)"
+            },
+            "paymentHistory": {
+              "type": "array",
+              "description": "ประวัติการชำระเงินของผู้ค้ำ",
+              "items": {
+                "date": {
+                  "type": "Date",
+                  "description": "วันที่ชำระ"
+                },
+                "amount": {
+                  "type": "number",
+                  "description": "จำนวนเงินที่ชำระ (บาท)"
+                },
+                "method": {
+                  "type": "string",
+                  "description": "วิธีการชำระ เช่น เงินสด, โอน, หักเงินเดือน"
+                },
+                "ref": {
+                  "type": "string",
+                  "description": "เลขที่อ้างอิงการชำระ/เลขที่ใบเสร็จ"
+                }
+              }
+            }
+          }
+        },
+        "remarks": {
+          "type": "string",
+          "description": "หมายเหตุเพิ่มเติม"
+        },
+        "createdAt": {
+          "type": "Date",
+          "description": "วันที่สร้างข้อมูล (ISO format)"
+        },
+        "createdBy": {
+          "type": "ObjectId",
+          "description": "รหัสผู้สร้างข้อมูล (อ้างอิงจาก users)"
+        },
+        "updatedAt": {
+          "type": "Date",
+          "description": "วันที่แก้ไขล่าสุด (ISO format)"
+        },
+        "updatedBy": {
+          "type": "ObjectId",
+          "description": "รหัสผู้แก้ไขล่าสุด (อ้างอิงจาก users)"
+        }
+      },
+      "indexes": [
+        { "key": { "guarantorId": 1, "status": 1 }, "description": "ค้นหาการค้ำประกันของสมาชิกตามสถานะ" },
+        { "key": { "borrowerId": 1 }, "description": "ค้นหาผู้ค้ำประกันของผู้กู้" },
+        { "key": { "loanId": 1 }, "description": "ค้นหาผู้ค้ำประกันของสัญญาเงินกู้" },
+        { "key": { "loanNo": 1 }, "description": "ค้นหาจากเลขที่สัญญา" },
+        { "key": { "status": 1 }, "description": "ค้นหาตามสถานะการค้ำประกัน" },
+        { "key": { "guarantorId": 1, "loanId": 1 }, "unique": true, "description": "ป้องกันการค้ำซ้ำในสัญญาเดียวกัน" }
+      ]
+    },
+    "guarantor_limits": {
+      "description": "วงเงินค้ำประกันของสมาชิก - คำนวณจากมูลค่าหุ้นและกฎระเบียบสหกรณ์",
+      "schema": {
+        "_id": {
+          "type": "ObjectId",
+          "description": "รหัสเอกสาร (สร้างอัตโนมัติ)"
+        },
+        "memberId": {
+          "type": "ObjectId",
+          "description": "รหัสสมาชิก (อ้างอิงจาก members)"
+        },
+        "memberNo": {
+          "type": "string",
+          "description": "เลขทะเบียนสมาชิก เช่น M2567-00050"
+        },
+        "memberName": {
+          "type": "string",
+          "description": "ชื่อ-นามสกุล สมาชิก"
+        },
+        "maxGuaranteeAmount": {
+          "type": "number",
+          "description": "วงเงินค้ำประกันสูงสุดที่ค้ำได้ (บาท) = shareValue × guaranteeToShareRatio"
+        },
+        "currentGuaranteeAmount": {
+          "type": "number",
+          "description": "วงเงินที่กำลังค้ำอยู่ปัจจุบัน (บาท) - รวมทุกสัญญาที่ค้ำ"
+        },
+        "availableAmount": {
+          "type": "number",
+          "description": "วงเงินคงเหลือที่ค้ำได้ (บาท) = maxGuaranteeAmount - currentGuaranteeAmount"
+        },
+        "maxGuaranteeContracts": {
+          "type": "number",
+          "description": "จำนวนสัญญาสูงสุดที่สามารถค้ำได้ (ตามระเบียบสหกรณ์)"
+        },
+        "currentContracts": {
+          "type": "number",
+          "description": "จำนวนสัญญาที่กำลังค้ำอยู่ปัจจุบัน"
+        },
+        "availableContracts": {
+          "type": "number",
+          "description": "จำนวนสัญญาคงเหลือที่ค้ำได้ = maxGuaranteeContracts - currentContracts"
+        },
+        "totalShares": {
+          "type": "number",
+          "description": "จำนวนหุ้นทั้งหมดของสมาชิก (หุ้น)"
+        },
+        "shareValue": {
+          "type": "number",
+          "description": "มูลค่าหุ้นรวม (บาท) = totalShares × ราคาต่อหุ้น"
+        },
+        "guaranteeToShareRatio": {
+          "type": "number",
+          "description": "อัตราส่วนค้ำต่อหุ้น เช่น 5 หมายถึงค้ำได้ 5 เท่าของมูลค่าหุ้น"
+        },
+        "calculatedAt": {
+          "type": "Date",
+          "description": "วันที่คำนวณวงเงินล่าสุด (ISO format)"
+        },
+        "updatedAt": {
+          "type": "Date",
+          "description": "วันที่อัปเดตข้อมูลล่าสุด (ISO format)"
+        }
+      },
+      "indexes": [
+        { "key": { "memberId": 1 }, "unique": true, "description": "สมาชิก 1 คน มีวงเงินค้ำ 1 รายการ" },
+        { "key": { "memberNo": 1 }, "unique": true, "description": "ค้นหาจากเลขทะเบียนสมาชิก" },
+        { "key": { "availableAmount": -1 }, "description": "เรียงลำดับตามวงเงินคงเหลือ (มาก->น้อย)" }
+      ]
+    },
+    "guarantor_summary": {
+      "description": "สรุปการค้ำประกันของสมาชิก - แสดงทั้งการเป็นผู้ค้ำและผู้ถูกค้ำ",
+      "schema": {
+        "_id": {
+          "type": "ObjectId",
+          "description": "รหัสเอกสาร (สร้างอัตโนมัติ)"
+        },
+        "memberId": {
+          "type": "ObjectId",
+          "description": "รหัสสมาชิก (อ้างอิงจาก members)"
+        },
+        "memberNo": {
+          "type": "string",
+          "description": "เลขทะเบียนสมาชิก เช่น M2567-00050"
+        },
+        "memberName": {
+          "type": "string",
+          "description": "ชื่อ-นามสกุล สมาชิก"
+        },
+        "asGuarantor": {
+          "type": "object",
+          "description": "สรุปข้อมูลในฐานะผู้ค้ำประกัน (ค้ำให้คนอื่น)",
+          "properties": {
+            "totalContracts": {
+              "type": "number",
+              "description": "จำนวนสัญญาที่เคยค้ำทั้งหมด (รวมทุกสถานะ)"
+            },
+            "totalAmount": {
+              "type": "number",
+              "description": "วงเงินค้ำประกันรวมทั้งหมด (บาท)"
+            },
+            "activeContracts": {
+              "type": "number",
+              "description": "จำนวนสัญญาที่กำลังค้ำอยู่ (สถานะ active)"
+            },
+            "activeAmount": {
+              "type": "number",
+              "description": "วงเงินค้ำประกันคงเหลือ (บาท) - เฉพาะสัญญาที่ยังค้ำอยู่"
+            },
+            "defaultedContracts": {
+              "type": "number",
+              "description": "จำนวนสัญญาที่ต้องรับผิดชอบแทนผู้กู้"
+            },
+            "defaultedAmount": {
+              "type": "number",
+              "description": "จำนวนเงินที่ต้องรับผิดชอบ (บาท)"
+            }
+          }
+        },
+        "asBorrower": {
+          "type": "object",
+          "description": "สรุปข้อมูลในฐานะผู้กู้ที่มีผู้ค้ำ",
+          "properties": {
+            "totalContracts": {
+              "type": "number",
+              "description": "จำนวนสัญญาที่มีผู้ค้ำทั้งหมด"
+            },
+            "totalGuarantors": {
+              "type": "number",
+              "description": "จำนวนผู้ค้ำทั้งหมด (นับซ้ำได้ถ้าค้ำหลายสัญญา)"
+            },
+            "totalGuaranteeAmount": {
+              "type": "number",
+              "description": "วงเงินค้ำประกันรวมจากผู้ค้ำทุกคน (บาท)"
+            }
+          }
+        },
+        "guaranteeContracts": {
+          "type": "array",
+          "description": "รายการสัญญาที่กำลังค้ำอยู่ (สำหรับแสดงรายละเอียด)",
+          "items": {
+            "loanId": {
+              "type": "ObjectId",
+              "description": "รหัสสัญญาเงินกู้"
+            },
+            "loanNo": {
+              "type": "string",
+              "description": "เลขที่สัญญาเงินกู้"
+            },
+            "loanType": {
+              "type": "string",
+              "description": "ประเภทเงินกู้"
+            },
+            "borrowerName": {
+              "type": "string",
+              "description": "ชื่อผู้กู้"
+            },
+            "guaranteeAmount": {
+              "type": "number",
+              "description": "วงเงินที่ค้ำ (บาท)"
+            },
+            "loanBalance": {
+              "type": "number",
+              "description": "ยอดหนี้คงเหลือของสัญญา (บาท)"
+            },
+            "status": {
+              "type": "string",
+              "description": "สถานะการค้ำประกัน"
+            }
+          }
+        },
+        "updatedAt": {
+          "type": "Date",
+          "description": "วันที่อัปเดตข้อมูลล่าสุด (ISO format)"
+        }
+      },
+      "indexes": [
+        { "key": { "memberId": 1 }, "unique": true, "description": "สมาชิก 1 คน มีสรุป 1 รายการ" },
+        { "key": { "memberNo": 1 }, "unique": true, "description": "ค้นหาจากเลขทะเบียนสมาชิก" }
+      ]
+    },
+    "guarantor_history": {
+      "description": "ประวัติการค้ำประกัน - บันทึกทุกเหตุการณ์ที่เกิดขึ้น",
+      "schema": {
+        "_id": {
+          "type": "ObjectId",
+          "description": "รหัสเอกสาร (สร้างอัตโนมัติ)"
+        },
+        "guarantorId": {
+          "type": "ObjectId",
+          "description": "รหัสสมาชิกผู้ค้ำประกัน (อ้างอิงจาก members)"
+        },
+        "guarantorNo": {
+          "type": "string",
+          "description": "เลขทะเบียนสมาชิกผู้ค้ำประกัน"
+        },
+        "guarantorName": {
+          "type": "string",
+          "description": "ชื่อ-นามสกุล ผู้ค้ำประกัน"
+        },
+        "loanId": {
+          "type": "ObjectId",
+          "description": "รหัสสัญญาเงินกู้ (อ้างอิงจาก loans)"
+        },
+        "loanNo": {
+          "type": "string",
+          "description": "เลขที่สัญญาเงินกู้"
+        },
+        "eventType": {
+          "type": "string",
+          "description": "ประเภทเหตุการณ์",
+          "enum": ["signed", "released", "defaulted", "paid", "amount_changed"]
+        },
+        "eventDate": {
+          "type": "Date",
+          "description": "วันที่เกิดเหตุการณ์ (ISO format)"
+        },
+        "description": {
+          "type": "string",
+          "description": "รายละเอียดเหตุการณ์ เช่น 'ลงนามค้ำประกันเงินกู้สามัญ'"
+        },
+        "previousAmount": {
+          "type": "number",
+          "description": "วงเงินค้ำก่อนหน้า (บาท) - กรณีมีการเปลี่ยนแปลง"
+        },
+        "newAmount": {
+          "type": "number",
+          "description": "วงเงินค้ำใหม่ (บาท) - กรณีมีการเปลี่ยนแปลง"
+        },
+        "remarks": {
+          "type": "string",
+          "description": "หมายเหตุเพิ่มเติม"
+        },
+        "createdAt": {
+          "type": "Date",
+          "description": "วันที่บันทึก (ISO format)"
+        },
+        "createdBy": {
+          "type": "ObjectId",
+          "description": "รหัสผู้บันทึก (อ้างอิงจาก users)"
+        }
+      },
+      "indexes": [
+        { "key": { "guarantorId": 1, "eventDate": -1 }, "description": "ค้นหาประวัติของผู้ค้ำตามลำดับเวลา" },
+        { "key": { "loanId": 1, "eventDate": -1 }, "description": "ค้นหาประวัติของสัญญาตามลำดับเวลา" },
+        { "key": { "eventType": 1, "eventDate": -1 }, "description": "ค้นหาตามประเภทเหตุการณ์" }
+      ]
+    },
+    "guarantor_settings": {
+      "description": "การตั้งค่าระบบค้ำประกัน - กำหนดกฎเกณฑ์และเงื่อนไขต่างๆ",
+      "schema": {
+        "_id": {
+          "type": "ObjectId",
+          "description": "รหัสเอกสาร (สร้างอัตโนมัติ)"
+        },
+        "settingKey": {
+          "type": "string",
+          "description": "รหัสการตั้งค่า เช่น 'guaranteeToShareRatio'"
+        },
+        "settingName": {
+          "type": "string",
+          "description": "ชื่อการตั้งค่า เช่น 'อัตราส่วนค้ำประกันต่อหุ้น'"
+        },
+        "settingValue": {
+          "type": "mixed",
+          "description": "ค่าการตั้งค่า (ตัวเลข/ข้อความ/object)"
+        },
+        "settingType": {
+          "type": "string",
+          "description": "ประเภทข้อมูล",
+          "enum": ["number", "string", "boolean", "object"]
+        },
+        "description": {
+          "type": "string",
+          "description": "คำอธิบายการตั้งค่า"
+        },
+        "effectiveDate": {
+          "type": "Date",
+          "description": "วันที่มีผลบังคับใช้"
+        },
+        "isActive": {
+          "type": "boolean",
+          "description": "สถานะการใช้งาน true=ใช้งาน, false=ไม่ใช้งาน"
+        },
+        "createdAt": {
+          "type": "Date",
+          "description": "วันที่สร้าง"
+        },
+        "updatedAt": {
+          "type": "Date",
+          "description": "วันที่แก้ไขล่าสุด"
+        },
+        "updatedBy": {
+          "type": "ObjectId",
+          "description": "รหัสผู้แก้ไขล่าสุด"
+        }
+      },
+      "indexes": [
+        { "key": { "settingKey": 1 }, "unique": true, "description": "รหัสการตั้งค่าห้ามซ้ำ" }
+      ]
+    }
+  },
+  "enums": {
+    "guaranteeStatus": {
+      "description": "สถานะการค้ำประกัน",
+      "values": {
+        "active": "กำลังค้ำ - อยู่ระหว่างการค้ำประกัน",
+        "released": "พ้นภาระ - ผู้กู้ชำระหนี้ครบหรือมีการเปลี่ยนผู้ค้ำ",
+        "defaulted": "ต้องรับผิดชอบ - ผู้กู้ผิดนัด ผู้ค้ำต้องชำระแทน",
+        "paid": "ชำระแล้ว - ผู้ค้ำชำระหนี้ที่ต้องรับผิดชอบครบแล้ว",
+        "written_off": "ตัดหนี้สูญ - หนี้ถูกตัดเป็นหนี้สูญ"
+      }
+    },
+    "eventType": {
+      "description": "ประเภทเหตุการณ์ในประวัติการค้ำประกัน",
+      "values": {
+        "signed": "ลงนาม - ลงนามเป็นผู้ค้ำประกัน",
+        "released": "พ้นภาระ - พ้นจากการเป็นผู้ค้ำประกัน",
+        "defaulted": "ต้องรับผิดชอบ - ต้องรับผิดชอบแทนผู้กู้",
+        "paid": "ชำระ - ชำระหนี้ที่ต้องรับผิดชอบ",
+        "amount_changed": "เปลี่ยนวงเงิน - มีการเปลี่ยนแปลงวงเงินค้ำประกัน"
+      }
+    },
+    "loanType": {
+      "description": "ประเภทเงินกู้ที่ค้ำประกัน",
+      "values": {
+        "emergency": "เงินกู้ฉุกเฉิน - กู้ได้เร็ว วงเงินน้อย",
+        "ordinary": "เงินกู้สามัญ - กู้ทั่วไป วงเงินปานกลาง",
+        "special": "เงินกู้พิเศษ - กู้วงเงินสูง มีหลักประกัน",
+        "refinance": "เงินกู้รีไฟแนนซ์ - กู้เพื่อปิดหนี้เดิม"
+      }
+    },
+    "paymentMethod": {
+      "description": "วิธีการชำระเงินของผู้ค้ำ",
+      "values": {
+        "cash": "เงินสด - ชำระเป็นเงินสดที่สหกรณ์",
+        "transfer": "โอนเงิน - โอนผ่านธนาคาร",
+        "salary_deduction": "หักเงินเดือน - หักจากเงินเดือนผ่านหน่วยงาน",
+        "share_deduction": "หักจากหุ้น - หักจากเงินค่าหุ้นสะสม"
+      }
+    }
+  },
+  "defaultSettings": {
+    "description": "ค่าตั้งต้นสำหรับระบบค้ำประกัน",
+    "values": [
+      {
+        "settingKey": "guaranteeToShareRatio",
+        "settingName": "อัตราส่วนค้ำประกันต่อหุ้น",
+        "settingValue": 5,
+        "description": "ค้ำได้ 5 เท่าของมูลค่าหุ้น"
+      },
+      {
+        "settingKey": "maxGuaranteeContracts",
+        "settingName": "จำนวนสัญญาสูงสุดที่ค้ำได้",
+        "settingValue": 3,
+        "description": "ค้ำได้สูงสุด 3 สัญญาพร้อมกัน"
+      },
+      {
+        "settingKey": "minShareForGuarantee",
+        "settingName": "จำนวนหุ้นขั้นต่ำสำหรับค้ำประกัน",
+        "settingValue": 100,
+        "description": "ต้องมีหุ้นอย่างน้อย 100 หุ้นจึงจะค้ำได้"
+      },
+      {
+        "settingKey": "guarantorMembershipYears",
+        "settingName": "อายุสมาชิกขั้นต่ำสำหรับค้ำประกัน",
+        "settingValue": 1,
+        "description": "ต้องเป็นสมาชิกอย่างน้อย 1 ปีจึงจะค้ำได้"
+      }
+    ]
+  },
+  "examples": {
+    "guarantor_registry": {
+      "_id": "ObjectId('...')",
+      "guarantorNo": "M2567-00050",
+      "guarantorName": "นายสมศักดิ์ รักดี",
+      "borrowerNo": "M2567-00125",
+      "borrowerName": "นายสมชาย ใจดี",
+      "loanNo": "LN2567-00125",
+      "loanType": "ordinary",
+      "loanAmount": 500000,
+      "guaranteeAmount": 250000,
+      "guaranteePercent": 50,
+      "signedDate": "2024-01-18T00:00:00.000Z",
+      "effectiveDate": "2024-01-20T00:00:00.000Z",
+      "status": "active",
+      "loanBalance": 450000,
+      "guaranteeBalance": 225000
+    },
+    "guarantor_limits": {
+      "_id": "ObjectId('...')",
+      "memberNo": "M2567-00050",
+      "memberName": "นายสมศักดิ์ รักดี",
+      "maxGuaranteeAmount": 1000000,
+      "currentGuaranteeAmount": 250000,
+      "availableAmount": 750000,
+      "maxGuaranteeContracts": 3,
+      "currentContracts": 1,
+      "availableContracts": 2,
+      "totalShares": 200,
+      "shareValue": 2000,
+      "guaranteeToShareRatio": 5
+    },
+    "guarantor_history": {
+      "_id": "ObjectId('...')",
+      "guarantorNo": "M2567-00050",
+      "guarantorName": "นายสมศักดิ์ รักดี",
+      "loanNo": "LN2567-00125",
+      "eventType": "signed",
+      "eventDate": "2024-01-18T00:00:00.000Z",
+      "description": "ลงนามค้ำประกันเงินกู้สามัญ 250,000 บาท",
+      "previousAmount": 0,
+      "newAmount": 250000,
+      "remarks": ""
+    }
+  }
+}

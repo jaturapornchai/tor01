@@ -1,0 +1,820 @@
+{
+  "collections": {
+    "loans": {
+      "description": "สัญญาเงินกู้ - เก็บข้อมูลการกู้ยืมเงินของสมาชิกทุกประเภท",
+      "schema": {
+        "_id": {
+          "type": "ObjectId",
+          "description": "รหัสเอกสาร MongoDB"
+        },
+        "loanNo": {
+          "type": "string",
+          "description": "เลขที่สัญญาเงินกู้ เช่น LN2567-00125"
+        },
+        "applicationNo": {
+          "type": "string",
+          "description": "เลขที่คำขอกู้ เช่น APP2567-00125"
+        },
+        "loanType": {
+          "type": "string",
+          "enum": ["ordinary", "emergency", "special", "housing"],
+          "description": "ประเภทเงินกู้"
+        },
+        "loanName": {
+          "type": "string",
+          "description": "ชื่อประเภทเงินกู้"
+        },
+        "memberId": {
+          "type": "ObjectId",
+          "description": "รหัสสมาชิกผู้กู้ (อ้างอิง members)"
+        },
+        "memberNo": {
+          "type": "string",
+          "description": "เลขทะเบียนสมาชิกผู้กู้"
+        },
+        "memberName": {
+          "type": "string",
+          "description": "ชื่อ-นามสกุลผู้กู้"
+        },
+        "idCard": {
+          "type": "string",
+          "description": "เลขบัตรประชาชนผู้กู้"
+        },
+        "department": {
+          "type": "string",
+          "description": "หน่วยงาน/สังกัดของผู้กู้"
+        },
+        "requestedAmount": {
+          "type": "number",
+          "description": "วงเงินที่ขอกู้ (บาท)"
+        },
+        "approvedAmount": {
+          "type": "number",
+          "description": "วงเงินที่ได้รับอนุมัติ (บาท)"
+        },
+        "disbursedAmount": {
+          "type": "number",
+          "description": "วงเงินที่เบิกจ่ายแล้ว (บาท)"
+        },
+        "interestRate": {
+          "type": "number",
+          "description": "อัตราดอกเบี้ย (%/ปี)"
+        },
+        "interestMethod": {
+          "type": "string",
+          "enum": ["flat", "effective", "add_on"],
+          "description": "วิธีคำนวณดอกเบี้ย"
+        },
+        "effectiveRate": {
+          "type": "number",
+          "description": "อัตราดอกเบี้ยที่แท้จริง (%/ปี)"
+        },
+        "term": {
+          "type": "number",
+          "description": "ระยะเวลาผ่อนชำระ (เดือน)"
+        },
+        "installment": {
+          "type": "number",
+          "description": "จำนวนเงินค่างวด (บาท/เดือน)"
+        },
+        "firstPaymentDate": {
+          "type": "Date",
+          "description": "วันที่ชำระงวดแรก"
+        },
+        "lastPaymentDate": {
+          "type": "Date",
+          "description": "วันที่ชำระงวดสุดท้ายตามสัญญา"
+        },
+        "paymentDay": {
+          "type": "number",
+          "description": "วันที่ชำระประจำเดือน (1-28)"
+        },
+        "processingFee": {
+          "type": "number",
+          "description": "ค่าธรรมเนียมดำเนินการ (บาท)"
+        },
+        "insuranceFee": {
+          "type": "number",
+          "description": "ค่าประกันสินเชื่อ (บาท)"
+        },
+        "otherFees": {
+          "type": "number",
+          "description": "ค่าใช้จ่ายอื่นๆ (บาท)"
+        },
+        "totalFees": {
+          "type": "number",
+          "description": "ค่าใช้จ่ายรวม (บาท)"
+        },
+        "principalBalance": {
+          "type": "number",
+          "description": "เงินต้นคงเหลือ (บาท)"
+        },
+        "interestBalance": {
+          "type": "number",
+          "description": "ดอกเบี้ยค้างชำระ (บาท)"
+        },
+        "feeBalance": {
+          "type": "number",
+          "description": "ค่าปรับค้างชำระ (บาท)"
+        },
+        "totalBalance": {
+          "type": "number",
+          "description": "ยอดคงเหลือรวม (บาท)"
+        },
+        "paidPrincipal": {
+          "type": "number",
+          "description": "เงินต้นที่ชำระแล้ว (บาท)"
+        },
+        "paidInterest": {
+          "type": "number",
+          "description": "ดอกเบี้ยที่ชำระแล้ว (บาท)"
+        },
+        "paidFees": {
+          "type": "number",
+          "description": "ค่าปรับที่ชำระแล้ว (บาท)"
+        },
+        "totalPaid": {
+          "type": "number",
+          "description": "เงินที่ชำระแล้วรวม (บาท)"
+        },
+        "paidInstallments": {
+          "type": "number",
+          "description": "จำนวนงวดที่ชำระแล้ว"
+        },
+        "remainingInstallments": {
+          "type": "number",
+          "description": "จำนวนงวดคงเหลือ"
+        },
+        "overdueAmount": {
+          "type": "number",
+          "description": "ยอดค้างชำระ (บาท)"
+        },
+        "overdueInstallments": {
+          "type": "number",
+          "description": "จำนวนงวดที่ค้างชำระ"
+        },
+        "lastOverdueDate": {
+          "type": "Date|null",
+          "description": "วันที่เริ่มค้างชำระ"
+        },
+        "penaltyRate": {
+          "type": "number",
+          "description": "อัตราค่าปรับล่าช้า (%/ปี)"
+        },
+        "penaltyAmount": {
+          "type": "number",
+          "description": "ค่าปรับสะสม (บาท)"
+        },
+        "guarantors": {
+          "type": "array",
+          "description": "ผู้ค้ำประกัน",
+          "items": {
+            "_id": {
+              "type": "ObjectId",
+              "description": "รหัสผู้ค้ำ"
+            },
+            "memberId": {
+              "type": "ObjectId",
+              "description": "รหัสสมาชิกผู้ค้ำ (อ้างอิง members)"
+            },
+            "memberNo": {
+              "type": "string",
+              "description": "เลขทะเบียนผู้ค้ำ"
+            },
+            "memberName": {
+              "type": "string",
+              "description": "ชื่อ-นามสกุลผู้ค้ำ"
+            },
+            "idCard": {
+              "type": "string",
+              "description": "เลขบัตรประชาชนผู้ค้ำ"
+            },
+            "guaranteeAmount": {
+              "type": "number",
+              "description": "วงเงินค้ำประกัน (บาท)"
+            },
+            "guaranteePercent": {
+              "type": "number",
+              "description": "สัดส่วนการค้ำ (%)"
+            },
+            "signedDate": {
+              "type": "Date|null",
+              "description": "วันที่ลงนามค้ำประกัน"
+            },
+            "status": {
+              "type": "string",
+              "enum": ["pending", "signed", "released", "defaulted"],
+              "description": "สถานะการค้ำ"
+            },
+            "remarks": {
+              "type": "string",
+              "description": "หมายเหตุ"
+            }
+          }
+        },
+        "totalGuaranteeAmount": {
+          "type": "number",
+          "description": "วงเงินค้ำประกันรวม (บาท)"
+        },
+        "collaterals": {
+          "type": "array",
+          "description": "หลักประกัน",
+          "items": {
+            "_id": {
+              "type": "ObjectId",
+              "description": "รหัสหลักประกัน"
+            },
+            "type": {
+              "type": "string",
+              "enum": ["shares", "deposit", "land", "building", "vehicle", "other"],
+              "description": "ประเภทหลักประกัน"
+            },
+            "description": {
+              "type": "string",
+              "description": "รายละเอียดหลักประกัน"
+            },
+            "value": {
+              "type": "number",
+              "description": "มูลค่าประเมิน (บาท)"
+            },
+            "appraisalDate": {
+              "type": "Date",
+              "description": "วันที่ประเมิน"
+            },
+            "documents": {
+              "type": "array",
+              "description": "เอกสารหลักประกัน"
+            },
+            "status": {
+              "type": "string",
+              "enum": ["active", "released"],
+              "description": "สถานะหลักประกัน"
+            }
+          }
+        },
+        "totalCollateralValue": {
+          "type": "number",
+          "description": "มูลค่าหลักประกันรวม (บาท)"
+        },
+        "purpose": {
+          "type": "string",
+          "description": "วัตถุประสงค์การกู้"
+        },
+        "purposeDetail": {
+          "type": "string",
+          "description": "รายละเอียดวัตถุประสงค์"
+        },
+        "applicationDate": {
+          "type": "Date",
+          "description": "วันที่ยื่นคำขอ"
+        },
+        "approvalDate": {
+          "type": "Date|null",
+          "description": "วันที่อนุมัติ"
+        },
+        "disbursementDate": {
+          "type": "Date|null",
+          "description": "วันที่เบิกจ่าย"
+        },
+        "maturityDate": {
+          "type": "Date",
+          "description": "วันครบกำหนดตามสัญญา"
+        },
+        "closeDate": {
+          "type": "Date|null",
+          "description": "วันที่ปิดบัญชี"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["draft", "pending", "reviewing", "approved", "rejected", "disbursed", "active", "overdue", "closed", "written_off", "cancelled"],
+          "description": "สถานะสัญญา"
+        },
+        "approval": {
+          "type": "object",
+          "description": "ข้อมูลการอนุมัติ",
+          "properties": {
+            "level1": {
+              "type": "object",
+              "description": "การอนุมัติระดับ 1 (เจ้าหน้าที่)",
+              "properties": {
+                "approvedBy": {
+                  "type": "ObjectId|null",
+                  "description": "รหัสผู้อนุมัติ"
+                },
+                "approvedAt": {
+                  "type": "Date|null",
+                  "description": "วันที่อนุมัติ"
+                },
+                "decision": {
+                  "type": "string|null",
+                  "enum": ["approved", "rejected"],
+                  "description": "ผลการพิจารณา"
+                },
+                "remarks": {
+                  "type": "string",
+                  "description": "หมายเหตุ"
+                }
+              }
+            },
+            "level2": {
+              "type": "object",
+              "description": "การอนุมัติระดับ 2 (ผู้จัดการ)",
+              "properties": {
+                "approvedBy": {
+                  "type": "ObjectId|null",
+                  "description": "รหัสผู้อนุมัติ"
+                },
+                "approvedAt": {
+                  "type": "Date|null",
+                  "description": "วันที่อนุมัติ"
+                },
+                "decision": {
+                  "type": "string|null",
+                  "description": "ผลการพิจารณา"
+                },
+                "remarks": {
+                  "type": "string",
+                  "description": "หมายเหตุ"
+                }
+              }
+            },
+            "committee": {
+              "type": "object",
+              "description": "การอนุมัติคณะกรรมการ",
+              "properties": {
+                "meetingNo": {
+                  "type": "string",
+                  "description": "เลขที่ประชุม"
+                },
+                "meetingDate": {
+                  "type": "Date|null",
+                  "description": "วันที่ประชุม"
+                },
+                "resolution": {
+                  "type": "string",
+                  "description": "มติที่ประชุม"
+                },
+                "approvedBy": {
+                  "type": "ObjectId[]",
+                  "description": "รายชื่อกรรมการที่อนุมัติ"
+                }
+              }
+            }
+          }
+        },
+        "rejectionReason": {
+          "type": "string",
+          "description": "เหตุผลที่ไม่อนุมัติ"
+        },
+        "disbursement": {
+          "type": "object",
+          "description": "ข้อมูลการเบิกจ่าย",
+          "properties": {
+            "method": {
+              "type": "string",
+              "enum": ["bank_transfer", "cheque", "cash"],
+              "description": "วิธีการเบิกจ่าย"
+            },
+            "bankAccount": {
+              "type": "object",
+              "description": "บัญชีที่โอนเข้า",
+              "properties": {
+                "bankName": {
+                  "type": "string",
+                  "description": "ชื่อธนาคาร"
+                },
+                "accountNo": {
+                  "type": "string",
+                  "description": "เลขที่บัญชี"
+                },
+                "accountName": {
+                  "type": "string",
+                  "description": "ชื่อบัญชี"
+                }
+              }
+            },
+            "chequeNo": {
+              "type": "string",
+              "description": "เลขที่เช็ค (กรณีจ่ายเช็ค)"
+            },
+            "disbursedBy": {
+              "type": "ObjectId|null",
+              "description": "รหัสผู้เบิกจ่าย"
+            },
+            "disbursedAt": {
+              "type": "Date|null",
+              "description": "วันที่เบิกจ่าย"
+            }
+          }
+        },
+        "documents": {
+          "type": "array",
+          "description": "เอกสารประกอบการกู้",
+          "items": {
+            "_id": {
+              "type": "ObjectId",
+              "description": "รหัสเอกสาร"
+            },
+            "type": {
+              "type": "string",
+              "description": "ประเภทเอกสาร"
+            },
+            "fileName": {
+              "type": "string",
+              "description": "ชื่อไฟล์"
+            },
+            "fileUrl": {
+              "type": "string",
+              "description": "URL ไฟล์"
+            },
+            "uploadedAt": {
+              "type": "Date",
+              "description": "วันที่อัพโหลด"
+            }
+          }
+        },
+        "remarks": {
+          "type": "string",
+          "description": "หมายเหตุ"
+        },
+        "createdAt": {
+          "type": "Date",
+          "description": "วันที่สร้างข้อมูล"
+        },
+        "createdBy": {
+          "type": "ObjectId",
+          "description": "รหัสผู้สร้าง"
+        },
+        "updatedAt": {
+          "type": "Date",
+          "description": "วันที่แก้ไขล่าสุด"
+        },
+        "updatedBy": {
+          "type": "ObjectId",
+          "description": "รหัสผู้แก้ไขล่าสุด"
+        }
+      },
+      "indexes": [
+        { "key": { "loanNo": 1 }, "unique": true, "description": "เลขที่สัญญาต้องไม่ซ้ำ" },
+        { "key": { "applicationNo": 1 }, "unique": true, "description": "เลขที่คำขอต้องไม่ซ้ำ" },
+        { "key": { "memberId": 1, "status": 1 }, "description": "ค้นหาตามสมาชิกและสถานะ" },
+        { "key": { "loanType": 1, "status": 1 }, "description": "ค้นหาตามประเภทและสถานะ" },
+        { "key": { "status": 1, "overdueAmount": -1 }, "description": "ค้นหาสัญญาค้างชำระ" },
+        { "key": { "maturityDate": 1 }, "description": "ค้นหาสัญญาใกล้ครบกำหนด" },
+        { "key": { "guarantors.memberId": 1 }, "description": "ค้นหาตามผู้ค้ำ" }
+      ]
+    },
+    "loan_payments": {
+      "description": "การชำระเงินกู้ - เก็บรายการชำระค่างวดทุกรายการ",
+      "schema": {
+        "_id": {
+          "type": "ObjectId",
+          "description": "รหัสเอกสาร MongoDB"
+        },
+        "loanId": {
+          "type": "ObjectId",
+          "description": "รหัสสัญญากู้ (อ้างอิง loans)"
+        },
+        "loanNo": {
+          "type": "string",
+          "description": "เลขที่สัญญา"
+        },
+        "loanType": {
+          "type": "string",
+          "description": "ประเภทเงินกู้"
+        },
+        "memberId": {
+          "type": "ObjectId",
+          "description": "รหัสสมาชิกผู้กู้"
+        },
+        "memberNo": {
+          "type": "string",
+          "description": "เลขทะเบียนสมาชิก"
+        },
+        "memberName": {
+          "type": "string",
+          "description": "ชื่อ-นามสกุลสมาชิก"
+        },
+        "paymentNo": {
+          "type": "string",
+          "description": "เลขที่ใบเสร็จ เช่น PAY2567-001234"
+        },
+        "paymentDate": {
+          "type": "Date",
+          "description": "วันที่ชำระ"
+        },
+        "dueDate": {
+          "type": "Date",
+          "description": "วันครบกำหนดชำระ"
+        },
+        "installmentNo": {
+          "type": "number",
+          "description": "งวดที่"
+        },
+        "principalDue": {
+          "type": "number",
+          "description": "เงินต้นที่ต้องชำระ (บาท)"
+        },
+        "interestDue": {
+          "type": "number",
+          "description": "ดอกเบี้ยที่ต้องชำระ (บาท)"
+        },
+        "feeDue": {
+          "type": "number",
+          "description": "ค่าปรับที่ต้องชำระ (บาท)"
+        },
+        "totalDue": {
+          "type": "number",
+          "description": "ยอดที่ต้องชำระรวม (บาท)"
+        },
+        "principalPaid": {
+          "type": "number",
+          "description": "เงินต้นที่ชำระ (บาท)"
+        },
+        "interestPaid": {
+          "type": "number",
+          "description": "ดอกเบี้ยที่ชำระ (บาท)"
+        },
+        "feePaid": {
+          "type": "number",
+          "description": "ค่าปรับที่ชำระ (บาท)"
+        },
+        "totalPaid": {
+          "type": "number",
+          "description": "ยอดชำระรวม (บาท)"
+        },
+        "principalBalance": {
+          "type": "number",
+          "description": "เงินต้นคงเหลือหลังชำระ (บาท)"
+        },
+        "totalBalance": {
+          "type": "number",
+          "description": "ยอดคงเหลือรวมหลังชำระ (บาท)"
+        },
+        "paymentMethod": {
+          "type": "string",
+          "enum": ["salary_deduction", "bank_transfer", "cash", "cheque"],
+          "description": "วิธีการชำระ"
+        },
+        "paymentRef": {
+          "type": "string",
+          "description": "เลขอ้างอิงการชำระ"
+        },
+        "chequeNo": {
+          "type": "string",
+          "description": "เลขที่เช็ค"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["pending", "completed", "partial", "cancelled", "reversed"],
+          "description": "สถานะการชำระ"
+        },
+        "isOverdue": {
+          "type": "boolean",
+          "description": "เป็นการชำระหลังครบกำหนดหรือไม่"
+        },
+        "daysOverdue": {
+          "type": "number",
+          "description": "จำนวนวันที่ล่าช้า"
+        },
+        "remarks": {
+          "type": "string",
+          "description": "หมายเหตุ"
+        },
+        "createdAt": {
+          "type": "Date",
+          "description": "วันที่สร้างรายการ"
+        },
+        "createdBy": {
+          "type": "ObjectId",
+          "description": "รหัสผู้สร้าง"
+        }
+      },
+      "indexes": [
+        { "key": { "paymentNo": 1 }, "unique": true, "description": "เลขที่ใบเสร็จต้องไม่ซ้ำ" },
+        { "key": { "loanId": 1, "installmentNo": 1 }, "description": "ค้นหาตามสัญญาและงวด" },
+        { "key": { "memberId": 1, "paymentDate": -1 }, "description": "ค้นหาตามสมาชิกและวันที่" },
+        { "key": { "dueDate": 1, "status": 1 }, "description": "ค้นหางวดที่ครบกำหนด" }
+      ]
+    },
+    "loan_schedules": {
+      "description": "ตารางผ่อนชำระ - เก็บตารางค่างวดล่วงหน้า",
+      "schema": {
+        "_id": {
+          "type": "ObjectId",
+          "description": "รหัสเอกสาร MongoDB"
+        },
+        "loanId": {
+          "type": "ObjectId",
+          "description": "รหัสสัญญากู้ (อ้างอิง loans)"
+        },
+        "loanNo": {
+          "type": "string",
+          "description": "เลขที่สัญญา"
+        },
+        "installmentNo": {
+          "type": "number",
+          "description": "งวดที่"
+        },
+        "dueDate": {
+          "type": "Date",
+          "description": "วันครบกำหนดชำระ"
+        },
+        "principal": {
+          "type": "number",
+          "description": "เงินต้นที่ต้องชำระ (บาท)"
+        },
+        "interest": {
+          "type": "number",
+          "description": "ดอกเบี้ยที่ต้องชำระ (บาท)"
+        },
+        "installment": {
+          "type": "number",
+          "description": "ค่างวด (บาท)"
+        },
+        "principalBalance": {
+          "type": "number",
+          "description": "เงินต้นคงเหลือ (บาท)"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["pending", "paid", "partial", "overdue"],
+          "description": "สถานะงวด"
+        },
+        "paidDate": {
+          "type": "Date|null",
+          "description": "วันที่ชำระจริง"
+        },
+        "paidAmount": {
+          "type": "number",
+          "description": "จำนวนที่ชำระจริง (บาท)"
+        }
+      },
+      "indexes": [
+        { "key": { "loanId": 1, "installmentNo": 1 }, "unique": true, "description": "สัญญาและงวดต้องไม่ซ้ำ" },
+        { "key": { "dueDate": 1, "status": 1 }, "description": "ค้นหางวดที่ครบกำหนด" }
+      ]
+    },
+    "loan_products": {
+      "description": "ผลิตภัณฑ์เงินกู้ - เก็บการตั้งค่าประเภทเงินกู้",
+      "schema": {
+        "_id": {
+          "type": "ObjectId",
+          "description": "รหัสเอกสาร MongoDB"
+        },
+        "code": {
+          "type": "string",
+          "description": "รหัสผลิตภัณฑ์"
+        },
+        "name": {
+          "type": "string",
+          "description": "ชื่อผลิตภัณฑ์"
+        },
+        "loanType": {
+          "type": "string",
+          "enum": ["ordinary", "emergency", "special", "housing"],
+          "description": "ประเภทเงินกู้"
+        },
+        "description": {
+          "type": "string",
+          "description": "รายละเอียดผลิตภัณฑ์"
+        },
+        "minAmount": {
+          "type": "number",
+          "description": "วงเงินกู้ขั้นต่ำ (บาท)"
+        },
+        "maxAmount": {
+          "type": "number",
+          "description": "วงเงินกู้สูงสุด (บาท)"
+        },
+        "maxMultiple": {
+          "type": "number",
+          "description": "กู้ได้กี่เท่าของหุ้น"
+        },
+        "interestRate": {
+          "type": "number",
+          "description": "อัตราดอกเบี้ย (%/ปี)"
+        },
+        "interestMethod": {
+          "type": "string",
+          "description": "วิธีคำนวณดอกเบี้ย"
+        },
+        "penaltyRate": {
+          "type": "number",
+          "description": "อัตราค่าปรับล่าช้า (%/ปี)"
+        },
+        "minTerm": {
+          "type": "number",
+          "description": "ระยะเวลาขั้นต่ำ (เดือน)"
+        },
+        "maxTerm": {
+          "type": "number",
+          "description": "ระยะเวลาสูงสุด (เดือน)"
+        },
+        "processingFeeRate": {
+          "type": "number",
+          "description": "อัตราค่าธรรมเนียม (%)"
+        },
+        "minGuarantors": {
+          "type": "number",
+          "description": "จำนวนผู้ค้ำขั้นต่ำ (คน)"
+        },
+        "maxGuarantors": {
+          "type": "number",
+          "description": "จำนวนผู้ค้ำสูงสุด (คน)"
+        },
+        "requireCollateral": {
+          "type": "boolean",
+          "description": "ต้องมีหลักประกันหรือไม่"
+        },
+        "minMembershipMonths": {
+          "type": "number",
+          "description": "ต้องเป็นสมาชิกขั้นต่ำกี่เดือน"
+        },
+        "isActive": {
+          "type": "boolean",
+          "description": "สถานะการใช้งาน"
+        },
+        "effectiveDate": {
+          "type": "Date",
+          "description": "วันที่มีผล"
+        },
+        "createdAt": {
+          "type": "Date",
+          "description": "วันที่สร้าง"
+        },
+        "updatedAt": {
+          "type": "Date",
+          "description": "วันที่แก้ไข"
+        }
+      }
+    }
+  },
+  "enums": {
+    "loanTypes": {
+      "ordinary": "เงินกู้สามัญ - กู้ได้ตามหุ้น ผ่อนระยะยาว",
+      "emergency": "เงินกู้ฉุกเฉิน - กู้ได้เร็ว วงเงินน้อย",
+      "special": "เงินกู้พิเศษ - วงเงินสูง ใช้หลักประกัน",
+      "housing": "เงินกู้เคหะ - สำหรับซื้อ/สร้างบ้าน"
+    },
+    "loanStatus": {
+      "draft": "ร่าง - ยังไม่ส่งคำขอ",
+      "pending": "รอพิจารณา - ส่งคำขอแล้ว",
+      "reviewing": "กำลังพิจารณา - เจ้าหน้าที่กำลังตรวจสอบ",
+      "approved": "อนุมัติ - รออนุมัติ",
+      "rejected": "ไม่อนุมัติ - ถูกปฏิเสธ",
+      "disbursed": "เบิกจ่ายแล้ว - จ่ายเงินแล้ว",
+      "active": "ปกติ - กำลังผ่อนชำระ",
+      "overdue": "ค้างชำระ - มียอดค้าง",
+      "closed": "ปิดบัญชี - ชำระครบ",
+      "written_off": "ตัดหนี้สูญ - ตัดเป็นหนี้สูญ",
+      "cancelled": "ยกเลิก - ยกเลิกคำขอ"
+    },
+    "interestMethods": {
+      "flat": "Flat Rate - คิดดอกเบี้ยคงที่ตลอดสัญญา",
+      "effective": "Effective Rate - คิดจากเงินต้นคงเหลือ",
+      "add_on": "Add-on - บวกดอกเบี้ยทั้งหมดล่วงหน้า"
+    },
+    "collateralTypes": {
+      "shares": "หุ้น - ใช้หุ้นค้ำประกัน",
+      "deposit": "เงินฝาก - ใช้เงินฝากค้ำประกัน",
+      "land": "ที่ดิน - ใช้โฉนดที่ดินค้ำประกัน",
+      "building": "สิ่งปลูกสร้าง - ใช้บ้าน/อาคารค้ำประกัน",
+      "vehicle": "ยานพาหนะ - ใช้รถยนต์/รถจักรยานยนต์ค้ำประกัน",
+      "other": "อื่นๆ - หลักประกันอื่น"
+    }
+  },
+  "examples": {
+    "ordinary_loan": {
+      "_id": "ObjectId('...')",
+      "loanNo": "LN2567-00125",
+      "applicationNo": "APP2567-00125",
+      "loanType": "ordinary",
+      "loanName": "เงินกู้สามัญ",
+      "memberNo": "M2567-00125",
+      "memberName": "นายสมชาย ใจดี",
+      "requestedAmount": 500000,
+      "approvedAmount": 500000,
+      "disbursedAmount": 500000,
+      "interestRate": 6.5,
+      "interestMethod": "effective",
+      "term": 60,
+      "installment": 9785,
+      "principalBalance": 450000,
+      "totalBalance": 452500,
+      "paidInstallments": 10,
+      "remainingInstallments": 50,
+      "status": "active",
+      "purpose": "ซื้อรถยนต์",
+      "guarantors": [
+        {
+          "memberNo": "M2567-00050",
+          "memberName": "นายสมศักดิ์ รักดี",
+          "guaranteeAmount": 250000,
+          "guaranteePercent": 50,
+          "status": "signed"
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,575 @@
+{
+  "collections": {
+    "deposit_accounts": {
+      "description": "บัญชีเงินฝาก - เก็บข้อมูลบัญชีเงินฝากของสมาชิกทุกประเภท",
+      "schema": {
+        "_id": {
+          "type": "ObjectId",
+          "description": "รหัสเอกสาร MongoDB"
+        },
+        "accountNo": {
+          "type": "string",
+          "description": "เลขที่บัญชี เช่น SAV2567-00125"
+        },
+        "accountType": {
+          "type": "string",
+          "enum": ["savings", "fixed", "special"],
+          "description": "ประเภทบัญชีเงินฝาก"
+        },
+        "accountName": {
+          "type": "string",
+          "description": "ชื่อบัญชี/ชื่อผลิตภัณฑ์"
+        },
+        "memberId": {
+          "type": "ObjectId",
+          "description": "รหัสสมาชิกเจ้าของบัญชี (อ้างอิง members)"
+        },
+        "memberNo": {
+          "type": "string",
+          "description": "เลขทะเบียนสมาชิก"
+        },
+        "memberName": {
+          "type": "string",
+          "description": "ชื่อ-นามสกุลสมาชิก"
+        },
+        "balance": {
+          "type": "number",
+          "description": "ยอดเงินคงเหลือ (บาท)"
+        },
+        "availableBalance": {
+          "type": "number",
+          "description": "ยอดเงินที่สามารถถอนได้ (บาท)"
+        },
+        "holdAmount": {
+          "type": "number",
+          "description": "ยอดเงินที่ถูกอายัด/ค้ำประกัน (บาท)"
+        },
+        "interestRate": {
+          "type": "number",
+          "description": "อัตราดอกเบี้ย (%/ปี)"
+        },
+        "interestAccrued": {
+          "type": "number",
+          "description": "ดอกเบี้ยค้างจ่ายสะสม (บาท)"
+        },
+        "fixedDeposit": {
+          "type": "object",
+          "description": "ข้อมูลเงินฝากประจำ (เฉพาะประเภทประจำ)",
+          "properties": {
+            "principal": {
+              "type": "number",
+              "description": "เงินต้น (บาท)"
+            },
+            "term": {
+              "type": "number",
+              "description": "ระยะเวลาฝาก (เดือน)"
+            },
+            "startDate": {
+              "type": "Date",
+              "description": "วันที่เริ่มฝาก"
+            },
+            "maturityDate": {
+              "type": "Date",
+              "description": "วันครบกำหนด"
+            },
+            "interestPayment": {
+              "type": "string",
+              "enum": ["monthly", "quarterly", "yearly", "maturity"],
+              "description": "ช่วงเวลาจ่ายดอกเบี้ย"
+            },
+            "autoRenew": {
+              "type": "boolean",
+              "description": "ต่ออายุอัตโนมัติเมื่อครบกำหนดหรือไม่"
+            },
+            "renewCount": {
+              "type": "number",
+              "description": "จำนวนครั้งที่ต่ออายุแล้ว"
+            }
+          }
+        },
+        "openDate": {
+          "type": "Date",
+          "description": "วันที่เปิดบัญชี"
+        },
+        "closeDate": {
+          "type": "Date|null",
+          "description": "วันที่ปิดบัญชี"
+        },
+        "lastTransactionDate": {
+          "type": "Date",
+          "description": "วันที่ทำรายการล่าสุด"
+        },
+        "lastInterestDate": {
+          "type": "Date",
+          "description": "วันที่คิดดอกเบี้ยล่าสุด"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["active", "dormant", "closed", "frozen"],
+          "description": "สถานะบัญชี"
+        },
+        "minBalance": {
+          "type": "number",
+          "description": "ยอดเงินขั้นต่ำที่ต้องคงไว้ (บาท)"
+        },
+        "maxWithdrawPerDay": {
+          "type": "number",
+          "description": "วงเงินถอนสูงสุดต่อวัน (บาท)"
+        },
+        "withdrawNotice": {
+          "type": "number",
+          "description": "ต้องแจ้งล่วงหน้ากี่วันก่อนถอน"
+        },
+        "authorizedPersons": {
+          "type": "array",
+          "description": "ผู้มีอำนาจเบิกถอนแทน",
+          "items": {
+            "name": {
+              "type": "string",
+              "description": "ชื่อ-นามสกุลผู้มีอำนาจ"
+            },
+            "idCard": {
+              "type": "string",
+              "description": "เลขบัตรประชาชน"
+            },
+            "relation": {
+              "type": "string",
+              "description": "ความสัมพันธ์กับเจ้าของบัญชี"
+            }
+          }
+        },
+        "createdAt": {
+          "type": "Date",
+          "description": "วันที่สร้างข้อมูล"
+        },
+        "createdBy": {
+          "type": "ObjectId",
+          "description": "รหัสผู้สร้างข้อมูล (อ้างอิง users)"
+        },
+        "updatedAt": {
+          "type": "Date",
+          "description": "วันที่แก้ไขล่าสุด"
+        },
+        "updatedBy": {
+          "type": "ObjectId",
+          "description": "รหัสผู้แก้ไขล่าสุด (อ้างอิง users)"
+        }
+      },
+      "indexes": [
+        { "key": { "accountNo": 1 }, "unique": true, "description": "เลขที่บัญชีต้องไม่ซ้ำ" },
+        { "key": { "memberId": 1, "accountType": 1 }, "description": "ค้นหาบัญชีตามสมาชิกและประเภท" },
+        { "key": { "accountType": 1, "status": 1 }, "description": "ค้นหาตามประเภทและสถานะ" },
+        { "key": { "fixedDeposit.maturityDate": 1 }, "description": "ค้นหาบัญชีใกล้ครบกำหนด" },
+        { "key": { "balance": -1 }, "description": "เรียงตามยอดเงิน" }
+      ]
+    },
+    "deposit_transactions": {
+      "description": "ธุรกรรมเงินฝาก - เก็บรายการฝาก ถอน และธุรกรรมอื่นๆ ทุกรายการ",
+      "schema": {
+        "_id": {
+          "type": "ObjectId",
+          "description": "รหัสเอกสาร MongoDB"
+        },
+        "accountId": {
+          "type": "ObjectId",
+          "description": "รหัสบัญชี (อ้างอิง deposit_accounts)"
+        },
+        "accountNo": {
+          "type": "string",
+          "description": "เลขที่บัญชี"
+        },
+        "accountType": {
+          "type": "string",
+          "description": "ประเภทบัญชี"
+        },
+        "memberId": {
+          "type": "ObjectId",
+          "description": "รหัสสมาชิก (อ้างอิง members)"
+        },
+        "memberNo": {
+          "type": "string",
+          "description": "เลขทะเบียนสมาชิก"
+        },
+        "memberName": {
+          "type": "string",
+          "description": "ชื่อ-นามสกุลสมาชิก"
+        },
+        "transactionNo": {
+          "type": "string",
+          "description": "เลขที่รายการ/ใบเสร็จ เช่น DEP2567-001234"
+        },
+        "transactionDate": {
+          "type": "Date",
+          "description": "วันที่ทำรายการ"
+        },
+        "valueDate": {
+          "type": "Date",
+          "description": "วันที่มีผลในระบบบัญชี"
+        },
+        "type": {
+          "type": "string",
+          "enum": ["open", "deposit", "withdraw", "interest", "tax", "fee", "transfer_in", "transfer_out", "close", "adjustment"],
+          "description": "ประเภทธุรกรรม"
+        },
+        "amount": {
+          "type": "number",
+          "description": "จำนวนเงิน (บาท)"
+        },
+        "fee": {
+          "type": "number",
+          "description": "ค่าธรรมเนียม (บาท)"
+        },
+        "tax": {
+          "type": "number",
+          "description": "ภาษีหัก ณ ที่จ่าย (บาท)"
+        },
+        "netAmount": {
+          "type": "number",
+          "description": "จำนวนเงินสุทธิ (บาท)"
+        },
+        "balanceBefore": {
+          "type": "number",
+          "description": "ยอดก่อนทำรายการ (บาท)"
+        },
+        "balanceAfter": {
+          "type": "number",
+          "description": "ยอดหลังทำรายการ (บาท)"
+        },
+        "paymentMethod": {
+          "type": "string",
+          "enum": ["cash", "cheque", "transfer", "salary_deduction", "auto_debit"],
+          "description": "วิธีการชำระเงิน/รับเงิน"
+        },
+        "paymentRef": {
+          "type": "string",
+          "description": "เลขอ้างอิงการชำระเงิน"
+        },
+        "chequeNo": {
+          "type": "string",
+          "description": "เลขที่เช็ค (กรณีจ่ายเช็ค)"
+        },
+        "bankAccount": {
+          "type": "object",
+          "description": "บัญชีธนาคารที่ใช้ทำรายการ",
+          "properties": {
+            "bankName": {
+              "type": "string",
+              "description": "ชื่อธนาคาร"
+            },
+            "accountNo": {
+              "type": "string",
+              "description": "เลขที่บัญชี"
+            }
+          }
+        },
+        "transferInfo": {
+          "type": "object",
+          "description": "ข้อมูลการโอน (กรณีโอนระหว่างบัญชี)",
+          "properties": {
+            "fromAccountNo": {
+              "type": "string",
+              "description": "บัญชีต้นทาง"
+            },
+            "toAccountNo": {
+              "type": "string",
+              "description": "บัญชีปลายทาง"
+            },
+            "relatedTransactionNo": {
+              "type": "string",
+              "description": "เลขที่รายการคู่"
+            }
+          }
+        },
+        "status": {
+          "type": "string",
+          "enum": ["pending", "completed", "cancelled", "reversed"],
+          "description": "สถานะรายการ"
+        },
+        "remarks": {
+          "type": "string",
+          "description": "หมายเหตุ/รายละเอียดเพิ่มเติม"
+        },
+        "teller": {
+          "type": "string",
+          "description": "ชื่อพนักงานผู้ทำรายการ"
+        },
+        "createdAt": {
+          "type": "Date",
+          "description": "วันที่สร้างรายการ"
+        },
+        "createdBy": {
+          "type": "ObjectId",
+          "description": "รหัสผู้สร้างรายการ (อ้างอิง users)"
+        }
+      },
+      "indexes": [
+        { "key": { "transactionNo": 1 }, "unique": true, "description": "เลขที่รายการต้องไม่ซ้ำ" },
+        { "key": { "accountId": 1, "transactionDate": -1 }, "description": "ค้นหาตามบัญชีและวันที่" },
+        { "key": { "memberId": 1, "transactionDate": -1 }, "description": "ค้นหาตามสมาชิกและวันที่" },
+        { "key": { "type": 1, "transactionDate": -1 }, "description": "ค้นหาตามประเภทและวันที่" },
+        { "key": { "valueDate": -1 }, "description": "เรียงตามวันที่มีผล" }
+      ]
+    },
+    "deposit_interest_rates": {
+      "description": "อัตราดอกเบี้ยเงินฝาก - เก็บอัตราดอกเบี้ยตามผลิตภัณฑ์และเงื่อนไข",
+      "schema": {
+        "_id": {
+          "type": "ObjectId",
+          "description": "รหัสเอกสาร MongoDB"
+        },
+        "productCode": {
+          "type": "string",
+          "description": "รหัสผลิตภัณฑ์"
+        },
+        "accountType": {
+          "type": "string",
+          "enum": ["savings", "fixed", "special"],
+          "description": "ประเภทบัญชี"
+        },
+        "name": {
+          "type": "string",
+          "description": "ชื่อผลิตภัณฑ์เงินฝาก"
+        },
+        "description": {
+          "type": "string",
+          "description": "รายละเอียดผลิตภัณฑ์"
+        },
+        "rates": {
+          "type": "array",
+          "description": "ตารางอัตราดอกเบี้ย",
+          "items": {
+            "minAmount": {
+              "type": "number",
+              "description": "ยอดเงินขั้นต่ำ (บาท)"
+            },
+            "maxAmount": {
+              "type": "number",
+              "description": "ยอดเงินสูงสุด (บาท)"
+            },
+            "rate": {
+              "type": "number",
+              "description": "อัตราดอกเบี้ย (%/ปี)"
+            },
+            "term": {
+              "type": "number",
+              "description": "ระยะเวลาฝาก (เดือน) - สำหรับเงินฝากประจำ"
+            }
+          }
+        },
+        "minOpenAmount": {
+          "type": "number",
+          "description": "จำนวนเงินขั้นต่ำในการเปิดบัญชี (บาท)"
+        },
+        "minBalance": {
+          "type": "number",
+          "description": "ยอดเงินขั้นต่ำที่ต้องคงไว้ (บาท)"
+        },
+        "taxRate": {
+          "type": "number",
+          "description": "อัตราภาษีหัก ณ ที่จ่าย (%)"
+        },
+        "interestCalculation": {
+          "type": "string",
+          "enum": ["daily", "monthly", "quarterly", "yearly"],
+          "description": "วิธีคิดดอกเบี้ย"
+        },
+        "interestPayment": {
+          "type": "string",
+          "enum": ["monthly", "quarterly", "yearly", "maturity"],
+          "description": "ช่วงเวลาจ่ายดอกเบี้ย"
+        },
+        "effectiveDate": {
+          "type": "Date",
+          "description": "วันที่เริ่มมีผล"
+        },
+        "expireDate": {
+          "type": "Date|null",
+          "description": "วันที่สิ้นสุด (null = ไม่มีกำหนด)"
+        },
+        "isActive": {
+          "type": "boolean",
+          "description": "สถานะการใช้งาน"
+        },
+        "createdAt": {
+          "type": "Date",
+          "description": "วันที่สร้าง"
+        },
+        "createdBy": {
+          "type": "ObjectId",
+          "description": "รหัสผู้สร้าง (อ้างอิง users)"
+        },
+        "updatedAt": {
+          "type": "Date",
+          "description": "วันที่แก้ไขล่าสุด"
+        },
+        "updatedBy": {
+          "type": "ObjectId",
+          "description": "รหัสผู้แก้ไข (อ้างอิง users)"
+        }
+      },
+      "indexes": [
+        { "key": { "productCode": 1 }, "unique": true, "description": "รหัสผลิตภัณฑ์ต้องไม่ซ้ำ" },
+        { "key": { "accountType": 1, "isActive": 1 }, "description": "ค้นหาตามประเภทและสถานะ" },
+        { "key": { "effectiveDate": -1 }, "description": "เรียงตามวันที่มีผล" }
+      ]
+    },
+    "deposit_monthly_summary": {
+      "description": "สรุปเงินฝากรายเดือน - เก็บสรุปยอดเงินฝากและธุรกรรมรายเดือน",
+      "schema": {
+        "_id": {
+          "type": "ObjectId",
+          "description": "รหัสเอกสาร MongoDB"
+        },
+        "year": {
+          "type": "number",
+          "description": "ปี (พ.ศ.)"
+        },
+        "month": {
+          "type": "number",
+          "description": "เดือน (1-12)"
+        },
+        "accountType": {
+          "type": "string",
+          "description": "ประเภทบัญชี"
+        },
+        "totalAccounts": {
+          "type": "number",
+          "description": "จำนวนบัญชีทั้งหมด"
+        },
+        "activeAccounts": {
+          "type": "number",
+          "description": "จำนวนบัญชีที่ใช้งาน"
+        },
+        "totalBalance": {
+          "type": "number",
+          "description": "ยอดเงินฝากรวม (บาท)"
+        },
+        "totalDeposits": {
+          "type": "number",
+          "description": "ยอดเงินฝากเข้าในเดือน (บาท)"
+        },
+        "totalWithdrawals": {
+          "type": "number",
+          "description": "ยอดเงินถอนในเดือน (บาท)"
+        },
+        "totalInterest": {
+          "type": "number",
+          "description": "ดอกเบี้ยจ่ายในเดือน (บาท)"
+        },
+        "newAccounts": {
+          "type": "number",
+          "description": "จำนวนบัญชีเปิดใหม่"
+        },
+        "closedAccounts": {
+          "type": "number",
+          "description": "จำนวนบัญชีที่ปิด"
+        },
+        "createdAt": {
+          "type": "Date",
+          "description": "วันที่สร้าง"
+        },
+        "updatedAt": {
+          "type": "Date",
+          "description": "วันที่อัพเดท"
+        }
+      },
+      "indexes": [
+        { "key": { "year": 1, "month": 1, "accountType": 1 }, "unique": true, "description": "ปี เดือน และประเภทต้องไม่ซ้ำ" }
+      ]
+    }
+  },
+  "enums": {
+    "accountTypes": {
+      "savings": "ออมทรัพย์ - บัญชีฝากถอนได้ตลอด",
+      "fixed": "ประจำ - บัญชีเงินฝากประจำ มีกำหนดระยะเวลา",
+      "special": "พิเศษ - บัญชีพิเศษ เงื่อนไขพิเศษ"
+    },
+    "transactionTypes": {
+      "open": "เปิดบัญชี - ฝากเงินแรกเปิดบัญชี",
+      "deposit": "ฝากเงิน - ฝากเงินเข้าบัญชี",
+      "withdraw": "ถอนเงิน - ถอนเงินออกจากบัญชี",
+      "interest": "ดอกเบี้ย - รับดอกเบี้ย",
+      "tax": "หักภาษี - หักภาษี ณ ที่จ่าย",
+      "fee": "ค่าธรรมเนียม - หักค่าธรรมเนียม",
+      "transfer_in": "รับโอน - รับโอนจากบัญชีอื่น",
+      "transfer_out": "โอนออก - โอนไปบัญชีอื่น",
+      "close": "ปิดบัญชี - ถอนเงินทั้งหมดและปิดบัญชี",
+      "adjustment": "ปรับปรุง - ปรับปรุงยอด (กรณีพิเศษ)"
+    },
+    "accountStatus": {
+      "active": "ใช้งาน - บัญชีปกติ",
+      "dormant": "ไม่เคลื่อนไหว - ไม่มีการทำรายการเกิน 1 ปี",
+      "closed": "ปิดบัญชี - ปิดบัญชีแล้ว",
+      "frozen": "อายัด - ถูกอายัดไม่สามารถทำรายการได้"
+    },
+    "transactionStatus": {
+      "pending": "รอดำเนินการ",
+      "completed": "เสร็จสิ้น",
+      "cancelled": "ยกเลิก",
+      "reversed": "กลับรายการ"
+    },
+    "interestPayment": {
+      "monthly": "รายเดือน - จ่ายทุกเดือน",
+      "quarterly": "รายไตรมาส - จ่ายทุก 3 เดือน",
+      "yearly": "รายปี - จ่ายปีละครั้ง",
+      "maturity": "ครบกำหนด - จ่ายเมื่อครบกำหนด"
+    }
+  },
+  "examples": {
+    "savings_account": {
+      "_id": "ObjectId('...')",
+      "accountNo": "SAV2567-00125",
+      "accountType": "savings",
+      "accountName": "บัญชีออมทรัพย์ทั่วไป",
+      "memberNo": "M2567-00125",
+      "memberName": "นายสมชาย ใจดี",
+      "balance": 50000,
+      "availableBalance": 50000,
+      "holdAmount": 0,
+      "interestRate": 2.5,
+      "interestAccrued": 125.5,
+      "openDate": "2024-01-15T00:00:00.000Z",
+      "lastTransactionDate": "2024-12-01T00:00:00.000Z",
+      "status": "active",
+      "minBalance": 100,
+      "maxWithdrawPerDay": 100000,
+      "withdrawNotice": 0
+    },
+    "fixed_deposit": {
+      "_id": "ObjectId('...')",
+      "accountNo": "FIX2567-00015",
+      "accountType": "fixed",
+      "accountName": "เงินฝากประจำ 12 เดือน",
+      "memberNo": "M2567-00125",
+      "memberName": "นายสมชาย ใจดี",
+      "balance": 100000,
+      "interestRate": 3.5,
+      "fixedDeposit": {
+        "principal": 100000,
+        "term": 12,
+        "startDate": "2024-01-15T00:00:00.000Z",
+        "maturityDate": "2025-01-15T00:00:00.000Z",
+        "interestPayment": "maturity",
+        "autoRenew": true,
+        "renewCount": 0
+      },
+      "openDate": "2024-01-15T00:00:00.000Z",
+      "status": "active"
+    },
+    "deposit_transaction": {
+      "_id": "ObjectId('...')",
+      "accountNo": "SAV2567-00125",
+      "transactionNo": "DEP2567-001234",
+      "transactionDate": "2024-12-01T00:00:00.000Z",
+      "type": "deposit",
+      "amount": 5000,
+      "fee": 0,
+      "netAmount": 5000,
+      "balanceBefore": 45000,
+      "balanceAfter": 50000,
+      "paymentMethod": "cash",
+      "status": "completed",
+      "remarks": "ฝากเงินประจำเดือน"
+    }
+  }
+}

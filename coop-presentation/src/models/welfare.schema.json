@@ -1,0 +1,794 @@
+{
+  "collections": {
+    "welfare_types": {
+      "description": "ประเภทสวัสดิการ - เก็บข้อมูลประเภทสวัสดิการทั้งหมดที่สหกรณ์ให้บริการ",
+      "schema": {
+        "_id": {
+          "type": "ObjectId",
+          "description": "รหัสเอกสาร MongoDB"
+        },
+        "code": {
+          "type": "string",
+          "description": "รหัสประเภทสวัสดิการ เช่น SCH-001, DTH-001"
+        },
+        "name": {
+          "type": "string",
+          "description": "ชื่อประเภทสวัสดิการ เช่น ทุนการศึกษาบุตร, สงเคราะห์ศพ"
+        },
+        "category": {
+          "type": "string",
+          "enum": ["member", "death", "scholarship", "medical", "disaster", "retirement", "other"],
+          "description": "หมวดหมู่สวัสดิการ"
+        },
+        "description": {
+          "type": "string",
+          "description": "รายละเอียดและเงื่อนไขของสวัสดิการ"
+        },
+        "amount": {
+          "type": "number",
+          "description": "จำนวนเงินสวัสดิการ (กรณีจำนวนคงที่)"
+        },
+        "minAmount": {
+          "type": "number",
+          "description": "จำนวนเงินขั้นต่ำที่เบิกได้"
+        },
+        "maxAmount": {
+          "type": "number",
+          "description": "จำนวนเงินสูงสุดที่เบิกได้"
+        },
+        "isFixedAmount": {
+          "type": "boolean",
+          "description": "เป็นจำนวนเงินคงที่หรือไม่ (true = คงที่, false = ตามเงื่อนไข)"
+        },
+        "conditions": {
+          "type": "object",
+          "description": "เงื่อนไขการเบิกสวัสดิการ",
+          "properties": {
+            "minMembershipYears": {
+              "type": "number",
+              "description": "ต้องเป็นสมาชิกขั้นต่ำกี่ปีจึงจะมีสิทธิ์"
+            },
+            "minAge": {
+              "type": "number",
+              "description": "อายุขั้นต่ำของผู้มีสิทธิ์ (ปี)"
+            },
+            "maxAge": {
+              "type": "number",
+              "description": "อายุสูงสุดของผู้มีสิทธิ์ (ปี)"
+            },
+            "maxClaimsPerYear": {
+              "type": "number",
+              "description": "จำนวนครั้งสูงสุดที่เบิกได้ต่อปี"
+            },
+            "maxAmountPerYear": {
+              "type": "number",
+              "description": "วงเงินสูงสุดที่เบิกได้ต่อปี (บาท)"
+            },
+            "requireDocuments": {
+              "type": "array",
+              "items": "string",
+              "description": "รายการเอกสารที่ต้องใช้ประกอบการเบิก"
+            },
+            "additionalConditions": {
+              "type": "string",
+              "description": "เงื่อนไขเพิ่มเติมอื่นๆ"
+            }
+          }
+        },
+        "eligibility": {
+          "type": "object",
+          "description": "คุณสมบัติผู้มีสิทธิ์",
+          "properties": {
+            "memberTypes": {
+              "type": "array",
+              "items": "string",
+              "description": "ประเภทสมาชิกที่มีสิทธิ์ เช่น ordinary, special"
+            },
+            "memberStatus": {
+              "type": "array",
+              "items": "string",
+              "description": "สถานะสมาชิกที่มีสิทธิ์ เช่น active, retired"
+            }
+          }
+        },
+        "isActive": {
+          "type": "boolean",
+          "description": "สถานะการใช้งาน (true = ใช้งาน, false = ยกเลิก)"
+        },
+        "effectiveDate": {
+          "type": "Date",
+          "description": "วันที่เริ่มมีผลบังคับใช้"
+        },
+        "expireDate": {
+          "type": "Date|null",
+          "description": "วันที่สิ้นสุดการใช้งาน (null = ไม่มีกำหนด)"
+        },
+        "createdAt": {
+          "type": "Date",
+          "description": "วันที่สร้างข้อมูล"
+        },
+        "createdBy": {
+          "type": "ObjectId",
+          "description": "รหัสผู้สร้างข้อมูล (อ้างอิง users)"
+        },
+        "updatedAt": {
+          "type": "Date",
+          "description": "วันที่แก้ไขล่าสุด"
+        },
+        "updatedBy": {
+          "type": "ObjectId",
+          "description": "รหัสผู้แก้ไขล่าสุด (อ้างอิง users)"
+        }
+      },
+      "indexes": [
+        { "key": { "code": 1 }, "unique": true, "description": "รหัสประเภทต้องไม่ซ้ำ" },
+        { "key": { "category": 1, "isActive": 1 }, "description": "ค้นหาตามหมวดและสถานะ" }
+      ]
+    },
+    "welfare_claims": {
+      "description": "คำขอเบิกสวัสดิการ - เก็บข้อมูลการยื่นคำขอและการอนุมัติสวัสดิการ",
+      "schema": {
+        "_id": {
+          "type": "ObjectId",
+          "description": "รหัสเอกสาร MongoDB"
+        },
+        "claimNo": {
+          "type": "string",
+          "description": "เลขที่คำขอ เช่น WF2567-00125"
+        },
+        "claimDate": {
+          "type": "Date",
+          "description": "วันที่ยื่นคำขอ"
+        },
+        "welfareTypeId": {
+          "type": "ObjectId",
+          "description": "รหัสประเภทสวัสดิการ (อ้างอิง welfare_types)"
+        },
+        "welfareCode": {
+          "type": "string",
+          "description": "รหัสประเภทสวัสดิการ"
+        },
+        "welfareName": {
+          "type": "string",
+          "description": "ชื่อสวัสดิการที่ขอเบิก"
+        },
+        "category": {
+          "type": "string",
+          "description": "หมวดหมู่สวัสดิการ"
+        },
+        "memberId": {
+          "type": "ObjectId",
+          "description": "รหัสสมาชิกผู้ขอเบิก (อ้างอิง members)"
+        },
+        "memberNo": {
+          "type": "string",
+          "description": "เลขทะเบียนสมาชิก"
+        },
+        "memberName": {
+          "type": "string",
+          "description": "ชื่อ-นามสกุลสมาชิก"
+        },
+        "idCard": {
+          "type": "string",
+          "description": "เลขบัตรประชาชนสมาชิก"
+        },
+        "department": {
+          "type": "string",
+          "description": "หน่วยงาน/สังกัดของสมาชิก"
+        },
+        "beneficiary": {
+          "type": "object",
+          "description": "ข้อมูลผู้รับเงินสวัสดิการ (กรณีไม่ใช่สมาชิก)",
+          "properties": {
+            "name": {
+              "type": "string",
+              "description": "ชื่อ-นามสกุลผู้รับเงิน"
+            },
+            "relation": {
+              "type": "string",
+              "description": "ความสัมพันธ์กับสมาชิก เช่น บุตร, คู่สมรส, บิดา, มารดา"
+            },
+            "idCard": {
+              "type": "string",
+              "description": "เลขบัตรประชาชนผู้รับเงิน"
+            },
+            "phone": {
+              "type": "string",
+              "description": "เบอร์โทรศัพท์ผู้รับเงิน"
+            },
+            "bankAccount": {
+              "type": "object",
+              "description": "บัญชีธนาคารผู้รับเงิน",
+              "properties": {
+                "bankName": {
+                  "type": "string",
+                  "description": "ชื่อธนาคาร"
+                },
+                "accountNo": {
+                  "type": "string",
+                  "description": "เลขที่บัญชี"
+                },
+                "accountName": {
+                  "type": "string",
+                  "description": "ชื่อบัญชี"
+                }
+              }
+            }
+          }
+        },
+        "scholarship": {
+          "type": "object",
+          "description": "ข้อมูลทุนการศึกษา (เฉพาะกรณีขอทุน)",
+          "properties": {
+            "studentName": {
+              "type": "string",
+              "description": "ชื่อ-นามสกุลนักเรียน/นักศึกษา"
+            },
+            "relation": {
+              "type": "string",
+              "description": "ความสัมพันธ์กับสมาชิก เช่น บุตร"
+            },
+            "school": {
+              "type": "string",
+              "description": "ชื่อสถานศึกษา"
+            },
+            "level": {
+              "type": "string",
+              "description": "ระดับการศึกษา เช่น ประถมศึกษา, มัธยมศึกษา, อุดมศึกษา"
+            },
+            "grade": {
+              "type": "string",
+              "description": "ชั้น/ชั้นปี เช่น ป.6, ม.3, ปี 4"
+            },
+            "gpa": {
+              "type": "number",
+              "description": "เกรดเฉลี่ยสะสม (GPAX)"
+            },
+            "academicYear": {
+              "type": "number",
+              "description": "ปีการศึกษา (พ.ศ.)"
+            },
+            "semester": {
+              "type": "number",
+              "description": "ภาคเรียน (1 หรือ 2)"
+            }
+          }
+        },
+        "death": {
+          "type": "object",
+          "description": "ข้อมูลสงเคราะห์ศพ (เฉพาะกรณีเสียชีวิต)",
+          "properties": {
+            "deceasedName": {
+              "type": "string",
+              "description": "ชื่อ-นามสกุลผู้เสียชีวิต"
+            },
+            "deceasedRelation": {
+              "type": "string",
+              "description": "ความสัมพันธ์กับสมาชิก เช่น ตนเอง, บิดา, มารดา, คู่สมรส, บุตร"
+            },
+            "deceasedIdCard": {
+              "type": "string",
+              "description": "เลขบัตรประชาชนผู้เสียชีวิต"
+            },
+            "deathDate": {
+              "type": "Date",
+              "description": "วันที่เสียชีวิต"
+            },
+            "deathCause": {
+              "type": "string",
+              "description": "สาเหตุการเสียชีวิต"
+            },
+            "deathCertNo": {
+              "type": "string",
+              "description": "เลขที่ใบมรณะบัตร"
+            }
+          }
+        },
+        "medical": {
+          "type": "object",
+          "description": "ข้อมูลค่ารักษาพยาบาล (เฉพาะกรณีเบิกค่ารักษา)",
+          "properties": {
+            "patientName": {
+              "type": "string",
+              "description": "ชื่อ-นามสกุลผู้ป่วย"
+            },
+            "patientRelation": {
+              "type": "string",
+              "description": "ความสัมพันธ์กับสมาชิก"
+            },
+            "hospital": {
+              "type": "string",
+              "description": "ชื่อโรงพยาบาล/สถานพยาบาล"
+            },
+            "diagnosis": {
+              "type": "string",
+              "description": "การวินิจฉัยโรค/อาการ"
+            },
+            "treatmentDate": {
+              "type": "Date",
+              "description": "วันที่เข้ารับการรักษา"
+            },
+            "admitDate": {
+              "type": "Date",
+              "description": "วันที่เข้าพักรักษา (กรณี Admit)"
+            },
+            "dischargeDate": {
+              "type": "Date",
+              "description": "วันที่ออกจากโรงพยาบาล"
+            },
+            "totalMedicalCost": {
+              "type": "number",
+              "description": "ค่ารักษาพยาบาลทั้งหมด (บาท)"
+            }
+          }
+        },
+        "disaster": {
+          "type": "object",
+          "description": "ข้อมูลภัยพิบัติ (เฉพาะกรณีประสบภัย)",
+          "properties": {
+            "disasterType": {
+              "type": "string",
+              "description": "ประเภทภัยพิบัติ เช่น น้ำท่วม, ไฟไหม้, วาตภัย"
+            },
+            "disasterDate": {
+              "type": "Date",
+              "description": "วันที่เกิดเหตุ"
+            },
+            "damageDescription": {
+              "type": "string",
+              "description": "รายละเอียดความเสียหาย"
+            },
+            "estimatedDamage": {
+              "type": "number",
+              "description": "มูลค่าความเสียหายโดยประมาณ (บาท)"
+            },
+            "address": {
+              "type": "string",
+              "description": "สถานที่เกิดเหตุ"
+            }
+          }
+        },
+        "requestedAmount": {
+          "type": "number",
+          "description": "จำนวนเงินที่ขอเบิก (บาท)"
+        },
+        "approvedAmount": {
+          "type": "number",
+          "description": "จำนวนเงินที่อนุมัติ (บาท)"
+        },
+        "paidAmount": {
+          "type": "number",
+          "description": "จำนวนเงินที่จ่ายจริง (บาท)"
+        },
+        "documents": {
+          "type": "array",
+          "description": "เอกสารประกอบการเบิก",
+          "items": {
+            "_id": {
+              "type": "ObjectId",
+              "description": "รหัสเอกสาร"
+            },
+            "type": {
+              "type": "string",
+              "description": "ประเภทเอกสาร เช่น ใบเสร็จ, ใบรับรองแพทย์, มรณะบัตร"
+            },
+            "fileName": {
+              "type": "string",
+              "description": "ชื่อไฟล์"
+            },
+            "fileUrl": {
+              "type": "string",
+              "description": "URL ของไฟล์"
+            },
+            "uploadedAt": {
+              "type": "Date",
+              "description": "วันที่อัพโหลด"
+            }
+          }
+        },
+        "status": {
+          "type": "string",
+          "enum": ["draft", "pending", "reviewing", "approved", "rejected", "paid", "cancelled"],
+          "description": "สถานะคำขอ"
+        },
+        "approval": {
+          "type": "object",
+          "description": "ข้อมูลการพิจารณา/อนุมัติ",
+          "properties": {
+            "reviewedBy": {
+              "type": "ObjectId|null",
+              "description": "รหัสผู้ตรวจสอบ (อ้างอิง users)"
+            },
+            "reviewedAt": {
+              "type": "Date|null",
+              "description": "วันที่ตรวจสอบ"
+            },
+            "reviewRemarks": {
+              "type": "string",
+              "description": "หมายเหตุจากผู้ตรวจสอบ"
+            },
+            "approvedBy": {
+              "type": "ObjectId|null",
+              "description": "รหัสผู้อนุมัติ (อ้างอิง users)"
+            },
+            "approvedAt": {
+              "type": "Date|null",
+              "description": "วันที่อนุมัติ"
+            },
+            "approvalRemarks": {
+              "type": "string",
+              "description": "หมายเหตุจากผู้อนุมัติ"
+            },
+            "rejectedBy": {
+              "type": "ObjectId|null",
+              "description": "รหัสผู้ไม่อนุมัติ (อ้างอิง users)"
+            },
+            "rejectedAt": {
+              "type": "Date|null",
+              "description": "วันที่ไม่อนุมัติ"
+            },
+            "rejectionReason": {
+              "type": "string",
+              "description": "เหตุผลที่ไม่อนุมัติ"
+            }
+          }
+        },
+        "payment": {
+          "type": "object",
+          "description": "ข้อมูลการจ่ายเงิน",
+          "properties": {
+            "method": {
+              "type": "string",
+              "enum": ["bank_transfer", "cheque", "cash"],
+              "description": "วิธีการจ่ายเงิน"
+            },
+            "bankAccount": {
+              "type": "object",
+              "description": "บัญชีธนาคารที่โอนเงินเข้า",
+              "properties": {
+                "bankName": {
+                  "type": "string",
+                  "description": "ชื่อธนาคาร"
+                },
+                "accountNo": {
+                  "type": "string",
+                  "description": "เลขที่บัญชี"
+                },
+                "accountName": {
+                  "type": "string",
+                  "description": "ชื่อบัญชี"
+                }
+              }
+            },
+            "chequeNo": {
+              "type": "string",
+              "description": "เลขที่เช็ค (กรณีจ่ายเช็ค)"
+            },
+            "paidBy": {
+              "type": "ObjectId|null",
+              "description": "รหัสผู้จ่ายเงิน (อ้างอิง users)"
+            },
+            "paidAt": {
+              "type": "Date|null",
+              "description": "วันที่จ่ายเงิน"
+            },
+            "paymentRef": {
+              "type": "string",
+              "description": "เลขอ้างอิงการจ่ายเงิน"
+            }
+          }
+        },
+        "remarks": {
+          "type": "string",
+          "description": "หมายเหตุจากผู้ขอ"
+        },
+        "internalNotes": {
+          "type": "string",
+          "description": "บันทึกภายใน (เจ้าหน้าที่)"
+        },
+        "createdAt": {
+          "type": "Date",
+          "description": "วันที่สร้างคำขอ"
+        },
+        "createdBy": {
+          "type": "ObjectId",
+          "description": "รหัสผู้สร้างคำขอ (อ้างอิง users)"
+        },
+        "updatedAt": {
+          "type": "Date",
+          "description": "วันที่แก้ไขล่าสุด"
+        },
+        "updatedBy": {
+          "type": "ObjectId",
+          "description": "รหัสผู้แก้ไขล่าสุด (อ้างอิง users)"
+        }
+      },
+      "indexes": [
+        { "key": { "claimNo": 1 }, "unique": true, "description": "เลขที่คำขอต้องไม่ซ้ำ" },
+        { "key": { "memberId": 1, "claimDate": -1 }, "description": "ค้นหาตามสมาชิกและวันที่" },
+        { "key": { "category": 1, "status": 1 }, "description": "ค้นหาตามหมวดและสถานะ" },
+        { "key": { "status": 1, "claimDate": -1 }, "description": "ค้นหาตามสถานะและวันที่" },
+        { "key": { "welfareTypeId": 1, "claimDate": -1 }, "description": "ค้นหาตามประเภทสวัสดิการ" }
+      ]
+    },
+    "welfare_annual_summary": {
+      "description": "สรุปสวัสดิการรายปี - เก็บข้อมูลสรุปการเบิกจ่ายสวัสดิการแยกตามปีและหมวด",
+      "schema": {
+        "_id": {
+          "type": "ObjectId",
+          "description": "รหัสเอกสาร MongoDB"
+        },
+        "year": {
+          "type": "number",
+          "description": "ปี (พ.ศ.)"
+        },
+        "category": {
+          "type": "string",
+          "description": "หมวดหมู่สวัสดิการ"
+        },
+        "totalClaims": {
+          "type": "number",
+          "description": "จำนวนคำขอทั้งหมด"
+        },
+        "approvedClaims": {
+          "type": "number",
+          "description": "จำนวนคำขอที่อนุมัติ"
+        },
+        "rejectedClaims": {
+          "type": "number",
+          "description": "จำนวนคำขอที่ไม่อนุมัติ"
+        },
+        "pendingClaims": {
+          "type": "number",
+          "description": "จำนวนคำขอที่รอพิจารณา"
+        },
+        "totalRequested": {
+          "type": "number",
+          "description": "ยอดเงินที่ขอเบิกรวม (บาท)"
+        },
+        "totalApproved": {
+          "type": "number",
+          "description": "ยอดเงินที่อนุมัติรวม (บาท)"
+        },
+        "totalPaid": {
+          "type": "number",
+          "description": "ยอดเงินที่จ่ายจริงรวม (บาท)"
+        },
+        "budget": {
+          "type": "number",
+          "description": "งบประมาณที่ตั้งไว้ (บาท)"
+        },
+        "used": {
+          "type": "number",
+          "description": "งบประมาณที่ใช้ไป (บาท)"
+        },
+        "remaining": {
+          "type": "number",
+          "description": "งบประมาณคงเหลือ (บาท)"
+        },
+        "createdAt": {
+          "type": "Date",
+          "description": "วันที่สร้างข้อมูล"
+        },
+        "updatedAt": {
+          "type": "Date",
+          "description": "วันที่อัพเดทล่าสุด"
+        }
+      },
+      "indexes": [
+        { "key": { "year": 1, "category": 1 }, "unique": true, "description": "ปีและหมวดต้องไม่ซ้ำ" }
+      ]
+    },
+    "welfare_member_usage": {
+      "description": "สรุปการใช้สวัสดิการรายสมาชิก - เก็บข้อมูลการใช้สิทธิ์ของสมาชิกแต่ละคน",
+      "schema": {
+        "_id": {
+          "type": "ObjectId",
+          "description": "รหัสเอกสาร MongoDB"
+        },
+        "memberId": {
+          "type": "ObjectId",
+          "description": "รหัสสมาชิก (อ้างอิง members)"
+        },
+        "memberNo": {
+          "type": "string",
+          "description": "เลขทะเบียนสมาชิก"
+        },
+        "memberName": {
+          "type": "string",
+          "description": "ชื่อ-นามสกุลสมาชิก"
+        },
+        "year": {
+          "type": "number",
+          "description": "ปี (พ.ศ.)"
+        },
+        "usageByCategory": {
+          "type": "object",
+          "description": "สรุปการใช้แยกตามหมวด",
+          "properties": {
+            "scholarship": {
+              "type": "object",
+              "description": "ทุนการศึกษา",
+              "properties": {
+                "claimCount": {
+                  "type": "number",
+                  "description": "จำนวนครั้งที่เบิก"
+                },
+                "totalAmount": {
+                  "type": "number",
+                  "description": "ยอดเงินที่ได้รับรวม (บาท)"
+                },
+                "remainingClaims": {
+                  "type": "number",
+                  "description": "จำนวนครั้งที่เบิกได้อีก"
+                },
+                "remainingAmount": {
+                  "type": "number",
+                  "description": "วงเงินที่เบิกได้อีก (บาท)"
+                }
+              }
+            },
+            "medical": {
+              "type": "object",
+              "description": "ค่ารักษาพยาบาล"
+            },
+            "death": {
+              "type": "object",
+              "description": "สงเคราะห์ศพ"
+            },
+            "disaster": {
+              "type": "object",
+              "description": "ภัยพิบัติ"
+            },
+            "other": {
+              "type": "object",
+              "description": "อื่นๆ"
+            }
+          }
+        },
+        "totalClaims": {
+          "type": "number",
+          "description": "จำนวนครั้งที่เบิกทั้งหมดในปี"
+        },
+        "totalReceived": {
+          "type": "number",
+          "description": "ยอดเงินที่ได้รับรวมทั้งปี (บาท)"
+        },
+        "updatedAt": {
+          "type": "Date",
+          "description": "วันที่อัพเดทล่าสุด"
+        }
+      },
+      "indexes": [
+        { "key": { "memberId": 1, "year": 1 }, "unique": true, "description": "สมาชิกและปีต้องไม่ซ้ำ" },
+        { "key": { "year": 1 }, "description": "ค้นหาตามปี" }
+      ]
+    }
+  },
+  "enums": {
+    "welfareCategories": {
+      "member": "สวัสดิการสมาชิก - สวัสดิการทั่วไปสำหรับสมาชิก",
+      "death": "สงเคราะห์ศพ - เงินช่วยเหลือกรณีสมาชิกหรือครอบครัวเสียชีวิต",
+      "scholarship": "ทุนการศึกษา - ทุนการศึกษาสำหรับสมาชิกหรือบุตร",
+      "medical": "ค่ารักษาพยาบาล - เงินช่วยเหลือค่ารักษาพยาบาล",
+      "disaster": "ภัยพิบัติ - เงินช่วยเหลือกรณีประสบภัยพิบัติ",
+      "retirement": "เกษียณอายุ - เงินบำเหน็จหรือสวัสดิการเกษียณ",
+      "other": "อื่นๆ - สวัสดิการประเภทอื่นๆ"
+    },
+    "claimStatus": {
+      "draft": "ร่าง - คำขอที่ยังไม่ส่ง",
+      "pending": "รอพิจารณา - ส่งคำขอแล้ว รอเจ้าหน้าที่ตรวจสอบ",
+      "reviewing": "กำลังพิจารณา - เจ้าหน้าที่กำลังตรวจสอบ",
+      "approved": "อนุมัติ - คำขอได้รับการอนุมัติ รอจ่ายเงิน",
+      "rejected": "ไม่อนุมัติ - คำขอถูกปฏิเสธ",
+      "paid": "จ่ายเงินแล้ว - จ่ายเงินให้ผู้รับแล้ว",
+      "cancelled": "ยกเลิก - คำขอถูกยกเลิก"
+    },
+    "paymentMethods": {
+      "bank_transfer": "โอนเงินผ่านธนาคาร",
+      "cheque": "เช็ค",
+      "cash": "เงินสด"
+    },
+    "documentTypes": {
+      "receipt": "ใบเสร็จรับเงิน",
+      "medical_certificate": "ใบรับรองแพทย์",
+      "death_certificate": "ใบมรณะบัตร",
+      "student_certificate": "ใบรับรองการเป็นนักเรียน/นักศึกษา",
+      "transcript": "ใบแสดงผลการเรียน",
+      "id_card": "สำเนาบัตรประชาชน",
+      "house_registration": "สำเนาทะเบียนบ้าน",
+      "photo": "รูปถ่ายความเสียหาย",
+      "other": "เอกสารอื่นๆ"
+    }
+  },
+  "examples": {
+    "scholarship_claim": {
+      "_id": "ObjectId('...')",
+      "claimNo": "WF2567-00125",
+      "claimDate": "2024-01-15T00:00:00.000Z",
+      "welfareCode": "SCH-001",
+      "welfareName": "ทุนการศึกษาบุตรสมาชิก",
+      "category": "scholarship",
+      "memberNo": "M2567-00125",
+      "memberName": "นายสมชาย ใจดี",
+      "scholarship": {
+        "studentName": "ด.ช.สมหมาย ใจดี",
+        "relation": "บุตร",
+        "school": "โรงเรียนสาธิต มหาวิทยาลัยเกษตรศาสตร์",
+        "level": "มัธยมศึกษา",
+        "grade": "ม.3",
+        "gpa": 3.75,
+        "academicYear": 2567,
+        "semester": 1
+      },
+      "requestedAmount": 3000,
+      "approvedAmount": 3000,
+      "paidAmount": 3000,
+      "status": "paid",
+      "payment": {
+        "method": "bank_transfer",
+        "bankAccount": {
+          "bankName": "ธนาคารกรุงไทย",
+          "accountNo": "123-4-56789-0",
+          "accountName": "นายสมชาย ใจดี"
+        },
+        "paidAt": "2024-01-25T00:00:00.000Z",
+        "paymentRef": "TRF2567-00050"
+      }
+    },
+    "death_claim": {
+      "_id": "ObjectId('...')",
+      "claimNo": "WF2567-00150",
+      "claimDate": "2024-02-10T00:00:00.000Z",
+      "welfareCode": "DTH-001",
+      "welfareName": "สงเคราะห์ศพสมาชิก",
+      "category": "death",
+      "memberNo": "M2560-00050",
+      "memberName": "นายสมศักดิ์ รักดี",
+      "death": {
+        "deceasedName": "นายสมศักดิ์ รักดี",
+        "deceasedRelation": "ตนเอง",
+        "deceasedIdCard": "1234567890123",
+        "deathDate": "2024-02-08T00:00:00.000Z",
+        "deathCause": "โรคประจำตัว",
+        "deathCertNo": "DC2567-00123"
+      },
+      "beneficiary": {
+        "name": "นางสมใจ รักดี",
+        "relation": "คู่สมรส",
+        "idCard": "1234567890124",
+        "phone": "081-234-5678",
+        "bankAccount": {
+          "bankName": "ธนาคารกรุงไทย",
+          "accountNo": "123-4-56789-0",
+          "accountName": "นางสมใจ รักดี"
+        }
+      },
+      "requestedAmount": 100000,
+      "approvedAmount": 100000,
+      "paidAmount": 100000,
+      "status": "paid"
+    },
+    "medical_claim": {
+      "_id": "ObjectId('...')",
+      "claimNo": "WF2567-00200",
+      "claimDate": "2024-03-05T00:00:00.000Z",
+      "welfareCode": "MED-001",
+      "welfareName": "ค่ารักษาพยาบาลสมาชิก",
+      "category": "medical",
+      "memberNo": "M2565-00080",
+      "memberName": "นางสาวสมหญิง รักสุข",
+      "medical": {
+        "patientName": "นางสาวสมหญิง รักสุข",
+        "patientRelation": "ตนเอง",
+        "hospital": "โรงพยาบาลศิริราช",
+        "diagnosis": "ไข้หวัดใหญ่",
+        "treatmentDate": "2024-03-01T00:00:00.000Z",
+        "totalMedicalCost": 5500
+      },
+      "requestedAmount": 5000,
+      "approvedAmount": 5000,
+      "status": "approved"
+    }
+  }
+}
